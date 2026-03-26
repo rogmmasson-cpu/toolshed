@@ -43,9 +43,9 @@ export default function AboutPage() {
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"
+                  src="/roger-router.jpg"
                   alt="Roger Masson, Founder of ToolShed"
-                  className="w-56 h-56 rounded-3xl object-cover shadow-xl ring-4 ring-brand-100"
+                  className="w-56 h-56 rounded-3xl object-cover object-top shadow-xl ring-4 ring-brand-100"
                 />
                 <div className="absolute -bottom-4 -right-4 bg-brand-500 text-white rounded-2xl px-4 py-2 shadow-lg text-sm font-bold">
                   Founder & Tool Borrower
