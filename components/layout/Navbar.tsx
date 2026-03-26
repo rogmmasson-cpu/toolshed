@@ -69,18 +69,28 @@ export default function Navbar() {
             </Link>
 
             {/* Notifications */}
-            <button className="relative p-2 rounded-xl hover:bg-gray-100 text-gray-600">
+            <Link href="/notifications" className="relative p-2 rounded-xl hover:bg-gray-100 text-gray-600">
               <Bell size={20} />
-            </button>
-
-            {/* Profile */}
-            <Link href="/dashboard" className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-100">
-              <Avatar
-                src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150&h=150&fit=crop&crop=face"
-                name="Alex Johnson"
-                size="sm"
-              />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
             </Link>
+
+            {/* Profile dropdown */}
+            <div className="relative group">
+              <Link href="/dashboard" className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-100">
+                <Avatar
+                  src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150&h=150&fit=crop&crop=face"
+                  name="Alex Johnson"
+                  size="sm"
+                />
+              </Link>
+              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-100 rounded-xl shadow-lg py-1 hidden group-hover:block z-50">
+                <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Dashboard</Link>
+                <Link href="/profile/usr_current" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Profile</Link>
+                <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Settings</Link>
+                <div className="border-t border-gray-100 my-1" />
+                <button className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50">Sign Out</button>
+              </div>
+            </div>
 
             {/* Mobile menu toggle */}
             <button
