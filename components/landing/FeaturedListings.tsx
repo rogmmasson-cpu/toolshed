@@ -11,7 +11,7 @@ export default async function FeaturedListings() {
         <div className="flex items-end justify-between mb-10">
           <div>
             <h2 className="section-title">Top-Rated Near You</h2>
-            <p className="section-subtitle">Highly reviewed tools available in Austin, TX</p>
+            <p className="section-subtitle">Highly reviewed tools available on the South Coast, MA</p>
           </div>
           <Link href="/browse" className="hidden sm:flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700">
             View all <ArrowRight size={16} />
