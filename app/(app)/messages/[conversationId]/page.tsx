@@ -112,7 +112,7 @@ export default function ConversationPage() {
               <div key={msg.id} className={cn('flex items-end gap-2', isMe ? 'justify-end' : 'justify-start')}>
                 {!isMe && (
                   <div className="w-7 flex-shrink-0">
-                    {showAvatar && <Avatar src={sender?.avatarUrl} name={sender?.name ?? '?'} size="xs" />}
+                    {showAvatar && <Avatar src={sender?.avatarUrl ?? null} name={sender?.name ?? '?'} size="xs" />}
                   </div>
                 )}
                 <div className={cn('max-w-[75%] flex flex-col gap-0.5', isMe ? 'items-end' : 'items-start')}>
