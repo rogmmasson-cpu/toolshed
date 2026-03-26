@@ -46,7 +46,7 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-white mb-3">ToolShed</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="hover:text-white transition-colors">About Us</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Trust & Safety</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Community Groups</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
@@ -64,7 +64,7 @@ export default function Footer() {
             <Link href="#" className="hover:text-white">Cookie Policy</Link>
           </div>
           <p className="text-xs text-gray-600 flex items-center gap-1">
-            Made with <Heart size={10} className="text-red-400 fill-red-400" /> in Austin, TX
+            Made with <Heart size={10} className="text-red-400 fill-red-400" /> in Fairhaven, MA
           </p>
         </div>
       </div>

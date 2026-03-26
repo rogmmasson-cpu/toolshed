@@ -30,7 +30,7 @@ export default function Hero() {
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-6">
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            2,400+ tools available near Austin, TX
+            2,400+ tools available near Fairhaven, MA
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
@@ -56,9 +56,9 @@ export default function Hero() {
               <MapPin size={20} className="text-brand-500 flex-shrink-0" />
               <input
                 type="text"
-                placeholder="Austin, TX"
+                placeholder="Fairhaven, MA"
                 className="flex-1 text-gray-700 text-sm outline-none"
-                defaultValue="Austin, TX"
+                defaultValue="Fairhaven, MA"
               />
             </div>
             <button

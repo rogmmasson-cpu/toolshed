@@ -4,7 +4,7 @@ const TESTIMONIALS = [
   {
     id: 1,
     name: 'Marisol V.',
-    location: 'East Austin',
+    location: 'Fairhaven Center',
     avatarUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face',
     rating: 5,
     text: "I borrowed a tile saw for my bathroom remodel and saved over $400 vs renting from a big box store. The owner walked me through how to use it — neighbors genuinely helping neighbors.",
@@ -14,7 +14,7 @@ const TESTIMONIALS = [
   {
     id: 2,
     name: 'James T.',
-    location: 'Mueller',
+    location: 'New Bedford',
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
     rating: 5,
     text: "I listed my pressure washer and power drill — both tools I only use twice a year — and made $340 last month alone. ToolShed is basically passive income on stuff just sitting in my garage.",
@@ -24,7 +24,7 @@ const TESTIMONIALS = [
   {
     id: 3,
     name: 'Priya K.',
-    location: 'South Lamar',
+    location: 'Mattapoisett',
     avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face',
     rating: 5,
     text: "I needed a stand mixer for a weekend of baking and found one two blocks away. The QR check-in was seamless, the deposit was handled automatically, and I had fresh bread Sunday morning.",
@@ -34,10 +34,10 @@ const TESTIMONIALS = [
   {
     id: 4,
     name: 'David R.',
-    location: 'Hyde Park',
+    location: 'Marion',
     avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
     rating: 5,
-    text: "As someone who just moved into my first house, ToolShed has been a lifesaver. I've completed 3 major home projects without buying a single specialized tool.",
+    text: "As someone who just moved into my first house on the South Coast, ToolShed has been a lifesaver. I've completed 3 major home projects without buying a single specialized tool.",
     toolBorrowed: '🔨 Rotary Hammer',
     savedAmount: '$780',
   },
@@ -48,7 +48,7 @@ export default function Testimonials() {
     <section className="py-16 bg-gray-50">
       <div className="container-app">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">Loved by Austin Neighbors</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">Loved by South Coast Neighbors</h2>
           <p className="text-gray-500 max-w-lg mx-auto">Real stories from people who stopped buying tools they only need once.</p>
         </div>
 
@@ -63,7 +63,7 @@ export default function Testimonials() {
               </div>
 
               {/* Quote */}
-              <p className="text-gray-700 text-sm leading-relaxed flex-1">"{t.text}"</p>
+              <p className="text-gray-700 text-sm leading-relaxed flex-1">&ldquo;{t.text}&rdquo;</p>
 
               {/* Chip */}
               <div className="flex items-center gap-2">
@@ -91,7 +91,7 @@ export default function Testimonials() {
                 />
                 <div>
                   <p className="font-semibold text-sm text-gray-900">{t.name}</p>
-                  <p className="text-xs text-gray-400">{t.location} · Austin, TX</p>
+                  <p className="text-xs text-gray-400">{t.location} · Fairhaven, MA area</p>
                 </div>
               </div>
             </div>
@@ -102,7 +102,7 @@ export default function Testimonials() {
         <div className="mt-10 text-center">
           <p className="text-sm text-gray-500">
             Rated <span className="font-bold text-gray-800">4.9 / 5.0</span> from over{' '}
-            <span className="font-bold text-gray-800">2,400 reviews</span> in Austin
+            <span className="font-bold text-gray-800">2,400 reviews</span> on the South Coast
           </p>
         </div>
       </div>

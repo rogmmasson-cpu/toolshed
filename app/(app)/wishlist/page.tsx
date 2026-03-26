@@ -13,11 +13,11 @@ import { MOCK_USERS } from '@/lib/data/mock-users'
 import { cn } from '@/lib/utils/cn'
 
 const MOCK_REQUESTS = [
-  { id: 'wr1', title: 'Pressure washer for deck cleaning', category: 'cleaning' as ToolCategory, requesterId: 'usr_4', location: 'Mueller', maxDailyRate: 3500, neededBy: '2024-04-25', fulfilled: false, createdAt: '2024-04-10', desc: 'Need to clean a large deck before painting. Looking for a ~2000 PSI electric washer for a weekend.' },
-  { id: 'wr2', title: 'Extension ladder (at least 24ft)', category: 'construction' as ToolCategory, requesterId: 'usr_current', location: 'Hyde Park', maxDailyRate: 2500, neededBy: '2024-05-01', fulfilled: false, createdAt: '2024-04-08', desc: 'Cleaning gutters on a two-story house. Need for one afternoon.' },
-  { id: 'wr3', title: 'Stand mixer for wedding cake baking', category: 'kitchen' as ToolCategory, requesterId: 'usr_1', location: 'East Austin', maxDailyRate: 2000, neededBy: '2024-04-20', fulfilled: true, createdAt: '2024-04-01', desc: 'Making 4 wedding cakes. Would love a KitchenAid or similar for 2 days.' },
-  { id: 'wr4', title: 'Concrete mixer for patio project', category: 'construction' as ToolCategory, requesterId: 'usr_5', location: 'North Loop', maxDailyRate: 5000, neededBy: null, fulfilled: false, createdAt: '2024-04-12', desc: 'Pouring a 12x16ft patio. Need for a full weekend, possibly two.' },
-  { id: 'wr5', title: 'Tile saw for bathroom remodel', category: 'power-tools' as ToolCategory, requesterId: 'usr_4', location: 'Mueller', maxDailyRate: 4500, neededBy: '2024-05-15', fulfilled: false, createdAt: '2024-04-13', desc: 'Full bathroom retile. Need a wet tile saw for 3-4 days.' },
+  { id: 'wr1', title: 'Pressure washer for deck cleaning', category: 'cleaning' as ToolCategory, requesterId: 'usr_4', location: 'North Dartmouth', maxDailyRate: 3500, neededBy: '2024-04-25', fulfilled: false, createdAt: '2024-04-10', desc: 'Need to clean a large deck before painting. Looking for a ~2000 PSI electric washer for a weekend.' },
+  { id: 'wr2', title: 'Extension ladder (at least 24ft)', category: 'construction' as ToolCategory, requesterId: 'usr_current', location: 'Fairhaven Center', maxDailyRate: 2500, neededBy: '2024-05-01', fulfilled: false, createdAt: '2024-04-08', desc: 'Cleaning gutters on a two-story house. Need for one afternoon.' },
+  { id: 'wr3', title: 'Stand mixer for wedding cake baking', category: 'kitchen' as ToolCategory, requesterId: 'usr_1', location: 'New Bedford', maxDailyRate: 2000, neededBy: '2024-04-20', fulfilled: true, createdAt: '2024-04-01', desc: 'Making 4 wedding cakes. Would love a KitchenAid or similar for 2 days.' },
+  { id: 'wr4', title: 'Concrete mixer for patio project', category: 'construction' as ToolCategory, requesterId: 'usr_5', location: 'Marion Village', maxDailyRate: 5000, neededBy: null, fulfilled: false, createdAt: '2024-04-12', desc: 'Pouring a 12x16ft patio. Need for a full weekend, possibly two.' },
+  { id: 'wr5', title: 'Tile saw for bathroom remodel', category: 'power-tools' as ToolCategory, requesterId: 'usr_4', location: 'Mattapoisett', maxDailyRate: 4500, neededBy: '2024-05-15', fulfilled: false, createdAt: '2024-04-13', desc: 'Full bathroom retile. Need a wet tile saw for 3-4 days.' },
 ]
 
 export default function WishlistPage() {
