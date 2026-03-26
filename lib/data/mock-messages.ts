@@ -1,0 +1,113 @@
+import { Conversation, Message } from '@/lib/types'
+
+export const MOCK_CONVERSATIONS: Conversation[] = [
+  {
+    id: 'conv_1',
+    participantIds: ['usr_current', 'usr_3'],
+    listingId: 'lst_4',
+    bookingId: 'bkg_2',
+    lastMessageAt: '2024-01-23T17:30:00Z',
+    lastMessagePreview: 'Thanks for returning it — deposit released!',
+  },
+  {
+    id: 'conv_3',
+    participantIds: ['usr_current', 'usr_2'],
+    listingId: 'lst_6',
+    bookingId: 'bkg_active',
+    lastMessageAt: '2024-04-10T09:15:00Z',
+    lastMessagePreview: 'Enjoy the mower! LMK if you have any questions.',
+  },
+  {
+    id: 'conv_4',
+    participantIds: ['usr_current', 'usr_1'],
+    listingId: 'lst_2',
+    bookingId: 'bkg_pending',
+    lastMessageAt: '2024-04-14T11:00:00Z',
+    lastMessagePreview: 'Hey! Looks good — I\'ll approve this shortly.',
+  },
+  {
+    id: 'conv_5',
+    participantIds: ['usr_current', 'usr_5'],
+    listingId: 'lst_5',
+    bookingId: null,
+    lastMessageAt: '2024-04-12T14:00:00Z',
+    lastMessagePreview: 'Is the ladder available the weekend of the 27th?',
+  },
+]
+
+export const MOCK_MESSAGES: Message[] = [
+  // conv_1
+  {
+    id: 'msg_1',
+    conversationId: 'conv_1',
+    senderId: 'usr_current',
+    content: 'Hi David! Is the pressure washer available Jan 22nd? I want to clean my driveway.',
+    attachments: [],
+    readAt: '2024-01-21T17:05:00Z',
+    createdAt: '2024-01-21T17:00:00Z',
+  },
+  {
+    id: 'msg_2',
+    conversationId: 'conv_1',
+    senderId: 'usr_3',
+    content: "Yes, it's free! Just make sure you book through the app so the deposit is handled properly. See you the 22nd.",
+    attachments: [],
+    readAt: '2024-01-21T17:30:00Z',
+    createdAt: '2024-01-21T17:25:00Z',
+  },
+  {
+    id: 'msg_3',
+    conversationId: 'conv_1',
+    senderId: 'usr_current',
+    content: "Perfect, booking now! Quick question — does it come with the soap dispenser attachment?",
+    attachments: [],
+    readAt: '2024-01-21T17:35:00Z',
+    createdAt: '2024-01-21T17:32:00Z',
+  },
+  {
+    id: 'msg_4',
+    conversationId: 'conv_1',
+    senderId: 'usr_3',
+    content: "Yes! Two detergent tanks included. Great for soap-and-rinse on the same pass.",
+    attachments: [],
+    readAt: '2024-01-21T18:00:00Z',
+    createdAt: '2024-01-21T17:58:00Z',
+  },
+  {
+    id: 'msg_5',
+    conversationId: 'conv_1',
+    senderId: 'usr_3',
+    content: 'Thanks for returning it — deposit released!',
+    attachments: [],
+    readAt: '2024-01-23T18:00:00Z',
+    createdAt: '2024-01-23T17:30:00Z',
+  },
+  // conv_3
+  {
+    id: 'msg_6',
+    conversationId: 'conv_3',
+    senderId: 'usr_2',
+    content: 'Approved your booking! The mower will be ready at 9am on the 10th.',
+    attachments: [],
+    readAt: '2024-04-09T20:00:00Z',
+    createdAt: '2024-04-09T19:30:00Z',
+  },
+  {
+    id: 'msg_7',
+    conversationId: 'conv_3',
+    senderId: 'usr_current',
+    content: "Great, I'll be there at 9. Thanks!",
+    attachments: [],
+    readAt: '2024-04-09T20:30:00Z',
+    createdAt: '2024-04-09T20:15:00Z',
+  },
+  {
+    id: 'msg_8',
+    conversationId: 'conv_3',
+    senderId: 'usr_2',
+    content: 'Enjoy the mower! LMK if you have any questions.',
+    attachments: [],
+    readAt: null,
+    createdAt: '2024-04-10T09:15:00Z',
+  },
+]
