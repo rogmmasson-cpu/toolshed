@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronRight, Check, Camera, DollarSign, Info } from 'lucide-react'
 import { CATEGORIES } from '@/lib/constants/categories'
-import { ToolCategory, ToolCondition } from '@/lib/types'
+import { ToolCategory, ToolCondition, Listing } from '@/lib/types'
+import { saveLocalListing } from '@/lib/utils/local-listings'
 import { getSmartPricingSuggestion } from '@/lib/utils/pricing'
 import { PRICING_BENCHMARKS } from '@/lib/constants/pricing-benchmarks'
 import { formatCents } from '@/lib/utils/formatting'
@@ -54,8 +55,44 @@ export default function NewListingPage() {
   ][step]
 
   function handleSubmit() {
-    // In production, would call server action / API
-    setTimeout(() => router.push('/dashboard'), 1000)
+    const now = new Date().toISOString()
+    const listing: Listing = {
+      id: `lst_local_${Date.now()}`,
+      ownerId: 'usr_current',
+      title: form.title,
+      description: form.description,
+      category: form.category as ToolCategory,
+      condition: form.condition as any,
+      brand: form.brand || undefined,
+      model: form.model || undefined,
+      retailValue: Number(form.retailValue) * 100 || 0,
+      photos: ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&h=600&fit=crop'],
+      tags: [form.category, form.brand].filter(Boolean) as string[],
+      accessories: form.accessories ? form.accessories.split('\n').filter(Boolean) : [],
+      location: { address: '', neighborhood: 'Fairhaven', city: 'Fairhaven', state: 'MA', lat: 41.638, lng: -70.904 },
+      pricing: {
+        dailyRate: Math.round(Number(form.dailyRate) * 100) || 0,
+        weeklyRate: null,
+        monthlyRate: null,
+        depositAmount: Math.round(Number(form.depositAmount) * 100) || 0,
+        insuranceAvailable: false,
+        insuranceDailyRate: null,
+      },
+      availability: {
+        blockedDates: [],
+        minRentalDays: Number(form.minRentalDays) || 1,
+        maxRentalDays: 30,
+        instantBook: form.instantBook,
+      },
+      toolKit: { isBundle: false, bundledListingIds: [], bundleDiscount: 0 },
+      stats: { averageRating: 0, reviewCount: 0, totalRentals: 0, viewCount: 0 },
+      status: 'active',
+      publishedAt: now,
+      createdAt: now,
+      updatedAt: now,
+    }
+    saveLocalListing(listing)
+    router.push('/dashboard/listings')
   }
 
   return (

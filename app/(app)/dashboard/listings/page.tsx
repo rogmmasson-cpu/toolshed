@@ -1,14 +1,28 @@
+'use client'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Eye, Pause, Edit3, TrendingUp, Star } from 'lucide-react'
-import { getListingsByOwner } from '@/lib/mock-db/listings'
+import { MOCK_LISTINGS } from '@/lib/data/mock-listings'
+import { MOCK_USERS } from '@/lib/data/mock-users'
+import { getLocalListings } from '@/lib/utils/local-listings'
 import { formatCents } from '@/lib/utils/formatting'
 import Badge from '@/components/ui/Badge'
+import { Listing } from '@/lib/types'
 
-export default async function ManageListingsPage() {
-  const listings = await getListingsByOwner('usr_current')
-  // Also show David Okafor's listings as a demo
-  const demo = await getListingsByOwner('usr_3')
-  const all = [...listings, ...demo]
+function getOwnerListings() {
+  const owned = MOCK_LISTINGS.filter(l => l.ownerId === 'usr_current' || l.ownerId === 'usr_3')
+  return owned
+}
+
+export default function ManageListingsPage() {
+  const [localListings, setLocalListings] = useState<Listing[]>([])
+
+  useEffect(() => {
+    setLocalListings(getLocalListings())
+  }, [])
+
+  const mockListings = getOwnerListings()
+  const all = [...localListings, ...mockListings]
 
   return (
     <div className="container-app py-8 max-w-4xl">
@@ -31,7 +45,6 @@ export default async function ManageListingsPage() {
         </div>
       )}
 
-      {/* Summary cards */}
       {all.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
@@ -54,7 +67,12 @@ export default async function ManageListingsPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="font-semibold text-gray-900 truncate">{listing.title}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-gray-900 truncate">{listing.title}</p>
+                    {listing.id.startsWith('lst_local_') && (
+                      <span className="text-xs bg-brand-50 text-brand-600 px-2 py-0.5 rounded-full font-medium">New</span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500 mt-0.5">{listing.location.neighborhood} · {formatCents(listing.pricing.dailyRate)}/day</p>
                 </div>
                 <Badge variant={listing.status === 'active' ? 'success' : listing.status === 'paused' ? 'warning' : 'default'}>
@@ -65,7 +83,9 @@ export default async function ManageListingsPage() {
               <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                 <span className="flex items-center gap-1"><Eye size={11}/>{listing.stats.viewCount} views</span>
                 <span className="flex items-center gap-1"><TrendingUp size={11}/>{listing.stats.totalRentals} rentals</span>
-                <span className="flex items-center gap-1"><Star size={11} className="fill-brand-400 text-brand-400"/>{listing.stats.averageRating.toFixed(1)} ({listing.stats.reviewCount})</span>
+                {listing.stats.reviewCount > 0 && (
+                  <span className="flex items-center gap-1"><Star size={11} className="fill-brand-400 text-brand-400"/>{listing.stats.averageRating.toFixed(1)} ({listing.stats.reviewCount})</span>
+                )}
               </div>
 
               <div className="flex gap-2 mt-3">
