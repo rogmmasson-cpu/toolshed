@@ -25,6 +25,49 @@ export type BookingStatus =
   | 'cancelled'
   | 'disputed'
 
+export type DisputeReason =
+  | 'item_damaged'
+  | 'item_not_returned'
+  | 'item_not_as_described'
+  | 'item_not_received'
+  | 'deposit_dispute'
+  | 'other'
+
+export type DisputeStatus = 'open' | 'under_review' | 'resolved' | 'closed'
+
+export type DisputeResolution =
+  | 'renter_wins'
+  | 'owner_wins'
+  | 'split'
+  | 'no_action'
+
+export interface DisputeEvent {
+  id: string
+  type: 'filed' | 'response' | 'admin_note' | 'resolved' | 'closed'
+  authorRole: 'renter' | 'owner' | 'admin'
+  authorName: string
+  content: string
+  createdAt: string
+}
+
+export interface Dispute {
+  id: string
+  bookingId: string
+  listingId: string
+  renterId: string
+  ownerId: string
+  filedByRole: 'renter' | 'owner'
+  reason: DisputeReason
+  status: DisputeStatus
+  resolution: DisputeResolution | null
+  resolutionNote: string | null
+  depositClaimAmount: number | null  // cents; null = no claim on deposit
+  timeline: DisputeEvent[]
+  createdAt: string
+  updatedAt: string
+  resolvedAt: string | null
+}
+
 export type DepositStatus = 'held' | 'released' | 'claimed' | 'partial-claimed'
 
 export type VerificationBadge = 'email' | 'phone' | 'id' | 'payment' | 'social'
@@ -82,6 +125,7 @@ export interface Listing {
   }
   pricing: {
     dailyRate: number
+    weekendRate: number | null   // if null, weekend days charge dailyRate
     weeklyRate: number | null
     monthlyRate: number | null
     depositAmount: number

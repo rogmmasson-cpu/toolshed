@@ -50,9 +50,23 @@ export function calcBookingPricing(
   dailyRate: number,
   totalDays: number,
   depositAmount: number,
-  insuranceEnrolled: boolean
+  insuranceEnrolled: boolean,
+  weekendRate?: number | null,
+  startDate?: string | null
 ): BookingPricing {
-  const subtotal = dailyRate * totalDays
+  let subtotal: number
+  if (weekendRate && startDate) {
+    subtotal = 0
+    const start = new Date(startDate + 'T00:00:00')
+    for (let i = 0; i < totalDays; i++) {
+      const d = new Date(start)
+      d.setDate(d.getDate() + i)
+      const dow = d.getDay()
+      subtotal += (dow === 0 || dow === 5 || dow === 6) ? weekendRate : dailyRate
+    }
+  } else {
+    subtotal = dailyRate * totalDays
+  }
   const platformFee = Math.round(subtotal * PLATFORM_FEE_PCT)
   const insuranceFee = insuranceEnrolled ? INSURANCE_DAILY_RATE * totalDays : 0
   const totalCharge = subtotal + platformFee + insuranceFee

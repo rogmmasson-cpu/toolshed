@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { MapPin, Package, CheckCircle2, ArrowLeft, Users, Clock } from 'lucide-react'
+import { MapPin, Package, CheckCircle2, ArrowLeft, Users, Clock, Lock } from 'lucide-react'
+import LocalListingView from '@/components/listings/LocalListingView'
 import { getListingById, getSimilarListings } from '@/lib/mock-db/listings'
 import { getReviewsForListing } from '@/lib/mock-db/reviews'
 import { getCategoryDef } from '@/lib/constants/categories'
-import { formatCents, formatDate } from '@/lib/utils/formatting'
+import { formatCents, formatDate, formatLocation } from '@/lib/utils/formatting'
 import PhotoGallery from '@/components/listings/PhotoGallery'
 import PricingCard from '@/components/listings/PricingCard'
 import ReviewCard from '@/components/reviews/ReviewCard'
@@ -14,6 +15,7 @@ import StarRating from '@/components/ui/StarRating'
 import Badge from '@/components/ui/Badge'
 import TrustScoreCard from '@/components/profile/TrustScoreCard'
 import { getUserById } from '@/lib/mock-db/users'
+import MessageOwnerButton from '@/components/messages/MessageOwnerButton'
 
 const conditionLabels = { 'like-new': 'Like New', 'excellent': 'Excellent', 'good': 'Good', 'fair': 'Fair' }
 const conditionColors = { 'like-new': 'success', 'excellent': 'info', 'good': 'default', 'fair': 'warning' } as const
@@ -22,6 +24,12 @@ interface Props { params: Promise<{ id: string }> }
 
 export default async function ListingDetailPage({ params }: Props) {
   const { id } = await params
+
+  // Local listings are stored in localStorage — render client-side
+  if (id.startsWith('lst_local_')) {
+    return <LocalListingView id={id} />
+  }
+
   const listing = await getListingById(id)
   if (!listing) notFound()
 
@@ -56,7 +64,7 @@ export default async function ListingDetailPage({ params }: Props) {
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{listing.title}</h1>
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-              <span className="flex items-center gap-1"><MapPin size={14} />{listing.location.neighborhood}, {listing.location.city}</span>
+              <span className="flex items-center gap-1"><MapPin size={14} />{formatLocation(listing.location.neighborhood, listing.location.city)}</span>
               <StarRating rating={listing.stats.averageRating} count={listing.stats.reviewCount} size="md" />
               <span className="flex items-center gap-1"><Users size={14} />{listing.stats.totalRentals} rentals</span>
             </div>
@@ -78,12 +86,29 @@ export default async function ListingDetailPage({ params }: Props) {
               </div>
               <span className="ml-auto text-brand-500 text-sm font-medium">View profile →</span>
             </Link>
+            <MessageOwnerButton
+              listingId={listing.id}
+              listingTitle={listing.title}
+              listingPhoto={listing.photos[0]}
+              listingDailyRate={listing.pricing.dailyRate}
+              listingNeighborhood={listing.location.neighborhood}
+              listingCity={listing.location.city}
+              ownerUserId={listing.ownerId}
+              ownerName={listing.owner.name}
+              ownerAvatar={listing.owner.avatarUrl}
+            />
           </div>
 
           {/* Description */}
           <div>
             <h2 className="font-semibold text-gray-900 text-lg mb-3">About this item</h2>
             <p className="text-gray-600 leading-relaxed">{listing.description}</p>
+          </div>
+
+          {/* Location privacy note */}
+          <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 rounded-xl px-4 py-3">
+            <Lock size={14} className="text-gray-400 flex-shrink-0" />
+            <span>Exact address shared only after a booking is confirmed.</span>
           </div>
 
           {/* Details */}

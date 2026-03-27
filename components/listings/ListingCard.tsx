@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { MapPin, Zap } from 'lucide-react'
 import { ListingWithOwner } from '@/lib/types'
-import { formatCents } from '@/lib/utils/formatting'
+import { formatCents, formatLocation } from '@/lib/utils/formatting'
 import { getCategoryDef } from '@/lib/constants/categories'
 import StarRating from '@/components/ui/StarRating'
 import Avatar from '@/components/ui/Avatar'
@@ -59,7 +59,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
 
           <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
             <MapPin size={11} />
-            <span>{listing.location.neighborhood}, {listing.location.city}</span>
+            <span>{formatLocation(listing.location.neighborhood, listing.location.city)}</span>
           </div>
 
           {/* Condition */}

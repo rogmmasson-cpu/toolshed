@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft, QrCode, Star, AlertTriangle, CheckCircle2, Clock, Package } from 'lucide-react'
+import { ArrowLeft, QrCode, Star, AlertTriangle, CheckCircle2, Clock, Package, Scale } from 'lucide-react'
 import { getBookingsByRenter } from '@/lib/mock-db/bookings'
 import { getListingById } from '@/lib/mock-db/listings'
 import { formatCents, formatDateRange, formatDuration } from '@/lib/utils/formatting'
@@ -133,6 +133,14 @@ function BookingRow({ booking, listing, showQr, showReview }: {
           >
             Message
           </Link>
+          {(booking.status === 'active' || booking.status === 'completed') && (
+            <Link
+              href={`/disputes/new?bookingId=${booking.id}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-red-200 hover:bg-red-50 text-red-600 text-xs font-semibold rounded-lg transition-colors"
+            >
+              <Scale size={12}/>File Dispute
+            </Link>
+          )}
         </div>
       </div>
     </div>

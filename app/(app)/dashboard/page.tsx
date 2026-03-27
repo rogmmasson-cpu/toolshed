@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { DollarSign, Package, Star, TrendingUp, ArrowRight, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
+import { currentUser } from '@clerk/nextjs/server'
 import { getCurrentUser } from '@/lib/mock-db/users'
 import { getListingsByOwner } from '@/lib/mock-db/listings'
 import { getBookingsByOwner, getBookingsByRenter } from '@/lib/mock-db/bookings'
@@ -8,12 +9,17 @@ import Avatar from '@/components/ui/Avatar'
 import TrustScoreCard from '@/components/profile/TrustScoreCard'
 
 export default async function DashboardPage() {
-  const [user, myListings, incomingBookings, myRentals] = await Promise.all([
+  const [clerkUser, mockUser, myListings, incomingBookings, myRentals] = await Promise.all([
+    currentUser(),
     getCurrentUser(),
     getListingsByOwner('usr_current'),
     getBookingsByOwner('usr_current'),
     getBookingsByRenter('usr_current'),
   ])
+
+  const displayName = clerkUser?.firstName ?? clerkUser?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? mockUser.name.split(' ')[0]
+  const displayAvatar = clerkUser?.imageUrl ?? mockUser.avatarUrl
+  const user = mockUser
 
   const totalEarnings = incomingBookings
     .filter((b) => b.status === 'completed')
@@ -33,9 +39,9 @@ export default async function DashboardPage() {
     <div className="container-app py-8 max-w-5xl">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
-        <Avatar src={user.avatarUrl} name={user.name} size="xl" />
+        <Avatar src={displayAvatar} name={displayName} size="xl" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user.name.split(' ')[0]}!</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Welcome back, {displayName}!</h1>
           <p className="text-gray-500">Member since {new Date(user.memberSince).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
         </div>
         <Link href="/listings/new" className="ml-auto hidden sm:flex items-center gap-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl text-sm transition-colors">

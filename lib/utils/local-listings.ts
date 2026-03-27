@@ -15,3 +15,13 @@ export function saveLocalListing(listing: Listing) {
   const existing = getLocalListings()
   localStorage.setItem(KEY, JSON.stringify([listing, ...existing]))
 }
+
+export function getLocalListingById(id: string): Listing | null {
+  return getLocalListings().find(l => l.id === id) ?? null
+}
+
+export function updateLocalListing(id: string, changes: Partial<Listing>) {
+  const listings = getLocalListings()
+  const updated = listings.map(l => l.id === id ? { ...l, ...changes } : l)
+  localStorage.setItem(KEY, JSON.stringify(updated))
+}

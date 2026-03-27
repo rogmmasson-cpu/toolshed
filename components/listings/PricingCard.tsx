@@ -17,7 +17,9 @@ export default function PricingCard({ listing }: { listing: ListingWithOwner }) 
   const [endDate, setEndDate] = useState('')
 
   const days = startDate && endDate ? Math.max(1, calcDaysBetween(startDate, endDate)) : 0
-  const pricing = days > 0 ? calcBookingPricing(listing.pricing.dailyRate, days, listing.pricing.depositAmount, false) : null
+  const pricing = days > 0
+    ? calcBookingPricing(listing.pricing.dailyRate, days, listing.pricing.depositAmount, false, listing.pricing.weekendRate, startDate)
+    : null
 
   return (
     <div className="card p-5 sticky top-24">
@@ -26,6 +28,11 @@ export default function PricingCard({ listing }: { listing: ListingWithOwner }) 
         <span className="text-3xl font-extrabold text-gray-900">{formatCents(listing.pricing.dailyRate)}</span>
         <span className="text-gray-500 text-sm">/day</span>
       </div>
+      {listing.pricing.weekendRate && (
+        <p className="text-xs text-amber-600 font-medium">
+          📅 {formatCents(listing.pricing.weekendRate)}/day on weekends (Fri–Sun)
+        </p>
+      )}
       {listing.pricing.weeklyRate && (
         <p className="text-xs text-forest-600 font-medium mb-3">
           💡 {formatCents(listing.pricing.weeklyRate)}/week (save {Math.round((1 - listing.pricing.weeklyRate / (listing.pricing.dailyRate * 7)) * 100)}%)
@@ -73,7 +80,11 @@ export default function PricingCard({ listing }: { listing: ListingWithOwner }) 
       {pricing && days > 0 && (
         <div className="bg-gray-50 rounded-xl p-4 mb-4 space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-600">{formatCents(listing.pricing.dailyRate)} × {days} day{days > 1 ? 's' : ''}</span>
+            <span className="text-gray-600">
+              {listing.pricing.weekendRate
+                ? `${days} day${days > 1 ? 's' : ''} (mixed rates)`
+                : `${formatCents(listing.pricing.dailyRate)} × ${days} day${days > 1 ? 's' : ''}`}
+            </span>
             <span className="font-medium">{formatCents(pricing.subtotal)}</span>
           </div>
           <div className="flex justify-between">

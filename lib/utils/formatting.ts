@@ -61,3 +61,11 @@ export function timeAgo(iso: string): string {
 export function slugify(str: string): string {
   return str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
 }
+
+/** Show "Neighborhood, City" only when they differ; otherwise just "City" */
+export function formatLocation(neighborhood: string | undefined, city: string): string {
+  if (neighborhood && neighborhood.trim() && neighborhood.trim() !== city.trim()) {
+    return `${neighborhood.trim()}, ${city}`
+  }
+  return city
+}

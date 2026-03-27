@@ -1,10 +1,11 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth, useUser, useClerk } from '@clerk/nextjs'
 import { Menu, X, Wrench, Bell, MessageSquare, User, Plus, Search } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { getTotalUnread } from '@/lib/utils/local-messages'
 
 const navLinks = [
   { href: '/browse', label: 'Browse Tools' },
@@ -15,7 +16,14 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
   const pathname = usePathname()
+
+  useEffect(() => {
+    setUnreadCount(getTotalUnread())
+    const interval = setInterval(() => setUnreadCount(getTotalUnread()), 5000)
+    return () => clearInterval(interval)
+  }, [pathname])
   const router = useRouter()
   const { isSignedIn, isLoaded } = useAuth()
   const { user } = useUser()
@@ -91,7 +99,11 @@ export default function Navbar() {
               {/* Messages */}
               <Link href="/messages" className="relative p-2 rounded-xl hover:bg-gray-100 text-gray-600">
                 <MessageSquare size={20} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-500 rounded-full" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-brand-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </Link>
 
               {/* Notifications */}
@@ -130,6 +142,7 @@ export default function Navbar() {
                       </div>
                       <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setDropdownOpen(false)}>Dashboard</Link>
                       <Link href={`/profile/${user?.id ?? 'me'}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setDropdownOpen(false)}>My Profile</Link>
+                      <Link href="/disputes" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setDropdownOpen(false)}>Disputes</Link>
                       <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setDropdownOpen(false)}>Settings</Link>
                       <div className="border-t border-gray-100 my-1" />
                       <button

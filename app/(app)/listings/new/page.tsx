@@ -1,7 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, Check, Camera, DollarSign, Info } from 'lucide-react'
+import { ChevronRight, Check, Camera, DollarSign, Info, MapPin, LocateFixed, Loader2, X } from 'lucide-react'
 import { CATEGORIES } from '@/lib/constants/categories'
 import { ToolCategory, ToolCondition, Listing } from '@/lib/types'
 import { saveLocalListing } from '@/lib/utils/local-listings'
@@ -21,6 +21,55 @@ const CONDITIONS: { value: ToolCondition; label: string; desc: string }[] = [
 
 const STEPS = ['Basics', 'Details', 'Photos', 'Pricing', 'Availability', 'Review']
 
+async function reverseGeocode(lat: number, lng: number) {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
+    { headers: { 'Accept-Language': 'en' } }
+  )
+  const data = await res.json()
+  const a = data.address ?? {}
+  const neighborhood = a.neighbourhood ?? a.suburb ?? a.quarter ?? a.hamlet ?? a.village ?? ''
+  const city = a.city ?? a.town ?? a.municipality ?? a.county ?? ''
+  const state = a.state ?? ''
+  const address = data.display_name ?? ''
+  return { neighborhood, city, state, address, lat, lng }
+}
+
+function compressToBlob(file: File, maxWidth = 1200, quality = 0.82): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const img = new Image()
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width)
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.round(img.width * scale)
+        canvas.height = Math.round(img.height * scale)
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error('Canvas toBlob failed')), 'image/jpeg', quality)
+      }
+      img.onerror = reject
+      img.src = e.target?.result as string
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
+async function uploadPhoto(file: File): Promise<string> {
+  const compressed = await compressToBlob(file)
+  const fd = new FormData()
+  fd.append('file', compressed, file.name.replace(/\.[^.]+$/, '.jpg'))
+  const res = await fetch('/api/upload', { method: 'POST', body: fd })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error ?? 'Upload failed')
+  }
+  const { url } = await res.json()
+  return url
+}
+
 export default function NewListingPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
@@ -34,10 +83,37 @@ export default function NewListingPage() {
     retailValue: '',
     accessories: '',
     dailyRate: '',
+    weekendRate: '',
     depositAmount: '',
     instantBook: true,
     minRentalDays: '1',
   })
+  const [location, setLocation] = useState({ neighborhood: '', city: '', state: '', address: '', lat: 0, lng: 0 })
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [photos, setPhotos] = useState<string[]>([])
+  const [uploadingSlot, setUploadingSlot] = useState<number | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  useEffect(() => { detectLocation() }, [])
+
+  async function detectLocation() {
+    if (!navigator.geolocation) { setLocationStatus('error'); return }
+    setLocationStatus('loading')
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const loc = await reverseGeocode(pos.coords.latitude, pos.coords.longitude)
+          setLocation(loc)
+          setLocationStatus('success')
+        } catch {
+          setLocationStatus('error')
+        }
+      },
+      () => setLocationStatus('error'),
+      { timeout: 10000 }
+    )
+  }
 
   const retailCents = Number(form.retailValue) * 100
   const suggestion =
@@ -63,15 +139,25 @@ export default function NewListingPage() {
       description: form.description,
       category: form.category as ToolCategory,
       condition: form.condition as any,
-      brand: form.brand || undefined,
-      model: form.model || undefined,
+      brand: form.brand || null,
+      model: form.model || null,
       retailValue: Number(form.retailValue) * 100 || 0,
-      photos: ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&h=600&fit=crop'],
+      photos: photos.filter(Boolean).length > 0
+        ? photos.filter(Boolean)
+        : ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&h=600&fit=crop'],
       tags: [form.category, form.brand].filter(Boolean) as string[],
       accessories: form.accessories ? form.accessories.split('\n').filter(Boolean) : [],
-      location: { address: '', neighborhood: 'Fairhaven', city: 'Fairhaven', state: 'MA', lat: 41.638, lng: -70.904 },
+      location: {
+        address: location.address,
+        neighborhood: location.neighborhood || '',
+        city: location.city,
+        state: location.state,
+        lat: location.lat,
+        lng: location.lng,
+      },
       pricing: {
         dailyRate: Math.round(Number(form.dailyRate) * 100) || 0,
+        weekendRate: form.weekendRate ? Math.round(Number(form.weekendRate) * 100) : null,
         weeklyRate: null,
         monthlyRate: null,
         depositAmount: Math.round(Number(form.depositAmount) * 100) || 0,
@@ -203,20 +289,79 @@ export default function NewListingPage() {
           </div>
         )}
 
-        {/* Step 2: Photos (mock) */}
+        {/* Step 2: Photos */}
         {step === 2 && (
           <div className="space-y-5">
             <h2 className="font-semibold text-gray-900 text-lg">Photos</h2>
-            <p className="text-sm text-gray-500">Add clear photos showing the item from multiple angles. Good photos increase bookings by 3×.</p>
+            <p className="text-sm text-gray-500">Add clear photos from multiple angles. Good photos increase bookings by 3×.</p>
             <div className="grid grid-cols-2 gap-3">
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className={cn('aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors', i === 0 ? 'border-brand-300 bg-brand-50' : 'border-gray-200 hover:border-gray-300 bg-gray-50')}>
-                  <Camera size={24} className={i === 0 ? 'text-brand-400' : 'text-gray-300'} />
-                  <span className="text-xs text-gray-500">{i === 0 ? 'Cover photo' : 'Add photo'}</span>
-                </div>
-              ))}
+              {[0, 1, 2, 3].map((i) => {
+                const hasPhoto = !!photos[i]
+                return (
+                  <div key={i} className="relative">
+                    <input
+                      ref={el => { fileInputRefs.current[i] = el }}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        setUploadingSlot(i)
+                        setUploadError(null)
+                        try {
+                          const url = await uploadPhoto(file)
+                          setPhotos(prev => {
+                            const next = [...prev]
+                            next[i] = url
+                            return next
+                          })
+                        } catch (err: any) {
+                          setUploadError(err.message ?? 'Upload failed')
+                        } finally {
+                          setUploadingSlot(null)
+                          e.target.value = ''
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRefs.current[i]?.click()}
+                      className={cn(
+                        'w-full aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-colors overflow-hidden',
+                        hasPhoto ? 'border-transparent' : i === 0 ? 'border-brand-300 bg-brand-50 hover:bg-brand-100' : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                      )}
+                    >
+                      {uploadingSlot === i ? (
+                        <Loader2 size={24} className="text-brand-400 animate-spin" />
+                      ) : hasPhoto ? (
+                        <img src={photos[i]} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <>
+                          <Camera size={24} className={i === 0 ? 'text-brand-400' : 'text-gray-300'} />
+                          <span className="text-xs text-gray-500">{i === 0 ? 'Cover photo' : 'Add photo'}</span>
+                        </>
+                      )}
+                    </button>
+                    {hasPhoto && (
+                      <button
+                        type="button"
+                        onClick={() => setPhotos(prev => { const n = [...prev]; n[i] = ''; return n })}
+                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
             </div>
-            <p className="text-xs text-gray-400">Photo upload is mocked in this demo. In production, images are stored securely on S3.</p>
+            {uploadError && (
+              <p className="text-xs text-red-600 font-medium">{uploadError}</p>
+            )}
+            {!uploadError && photos.filter(Boolean).length === 0 && (
+              <p className="text-xs text-amber-600">At least one photo helps renters trust your listing.</p>
+            )}
           </div>
         )}
 
@@ -279,6 +424,17 @@ export default function NewListingPage() {
                 onChange={(e) => setForm({ ...form, dailyRate: e.target.value })}
               />
               <Input
+                label="Weekend Rate (optional)"
+                placeholder="Same as daily"
+                type="number"
+                leftIcon={<DollarSign size={16} />}
+                value={form.weekendRate}
+                onChange={(e) => setForm({ ...form, weekendRate: e.target.value })}
+                hint="Fri–Sun rate, leave blank to use daily rate"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Input
                 label="Security Deposit ($)"
                 placeholder="50.00"
                 type="number"
@@ -295,7 +451,65 @@ export default function NewListingPage() {
         {/* Step 4: Availability */}
         {step === 4 && (
           <div className="space-y-5">
-            <h2 className="font-semibold text-gray-900 text-lg">Availability</h2>
+            <h2 className="font-semibold text-gray-900 text-lg">Availability & Location</h2>
+
+            {/* Location */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Item Location</label>
+              {locationStatus === 'loading' && (
+                <div className="flex items-center gap-2 text-sm text-gray-500 p-3 bg-gray-50 rounded-xl">
+                  <Loader2 size={14} className="animate-spin" /> Detecting your location…
+                </div>
+              )}
+              {locationStatus === 'success' && (
+                <div className="p-3 bg-forest-50 border border-forest-200 rounded-xl text-sm flex items-start gap-2">
+                  <MapPin size={14} className="text-forest-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-medium text-forest-800">{location.neighborhood}{location.neighborhood && location.city ? ', ' : ''}{location.city}{location.state ? ', ' + location.state : ''}</p>
+                    <p className="text-xs text-forest-600 mt-0.5 truncate">{location.address}</p>
+                  </div>
+                  <button type="button" onClick={detectLocation} className="text-xs text-forest-600 hover:text-forest-800 underline whitespace-nowrap">Refresh</button>
+                </div>
+              )}
+              {locationStatus === 'error' && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-amber-700 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                    <MapPin size={14} />
+                    <span>Location access denied or unavailable.</span>
+                    <button type="button" onClick={detectLocation} className="ml-auto text-xs underline">Try again</button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      label="Neighborhood"
+                      placeholder="e.g. South End"
+                      value={location.neighborhood}
+                      onChange={(e) => setLocation({ ...location, neighborhood: e.target.value })}
+                    />
+                    <Input
+                      label="City"
+                      placeholder="e.g. Boston"
+                      value={location.city}
+                      onChange={(e) => setLocation({ ...location, city: e.target.value })}
+                    />
+                  </div>
+                  <Input
+                    label="State"
+                    placeholder="e.g. MA"
+                    value={location.state}
+                    onChange={(e) => setLocation({ ...location, state: e.target.value })}
+                  />
+                </div>
+              )}
+              {locationStatus === 'idle' && (
+                <button
+                  type="button"
+                  onClick={detectLocation}
+                  className="flex items-center gap-2 text-sm text-brand-600 hover:text-brand-700 font-medium"
+                >
+                  <LocateFixed size={14} /> Detect my location
+                </button>
+              )}
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Booking Type</label>
               <div className="grid grid-cols-2 gap-3">
@@ -339,6 +553,7 @@ export default function NewListingPage() {
                 { label: 'Daily Rate', value: form.dailyRate ? `$${form.dailyRate}` : '—' },
                 { label: 'Deposit', value: form.depositAmount ? `$${form.depositAmount}` : '—' },
                 { label: 'Booking Type', value: form.instantBook ? 'Instant Book' : 'Request to Book' },
+                { label: 'Location', value: location.city ? `${location.city}${location.state ? ', ' + location.state : ''}` : 'Not set' },
               ].map((row) => (
                 <div key={row.label} className="flex justify-between py-2 border-b border-gray-100">
                   <span className="text-gray-500">{row.label}</span>

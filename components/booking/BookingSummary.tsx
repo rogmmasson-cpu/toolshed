@@ -1,7 +1,7 @@
 'use client'
 import { Shield, Zap } from 'lucide-react'
 import { ListingWithOwner } from '@/lib/types'
-import { formatCents } from '@/lib/utils/formatting'
+import { formatCents, formatLocation } from '@/lib/utils/formatting'
 import { calcBookingPricing } from '@/lib/utils/pricing'
 import { INSURANCE_DAILY_CENTS } from '@/lib/utils/pricing'
 import Avatar from '@/components/ui/Avatar'
@@ -16,7 +16,7 @@ interface BookingSummaryProps {
 }
 
 export default function BookingSummary({ listing, startDate, endDate, days, insuranceEnrolled, waiverSigned }: BookingSummaryProps) {
-  const pricing = calcBookingPricing(listing.pricing.dailyRate, days, listing.pricing.depositAmount, insuranceEnrolled)
+  const pricing = calcBookingPricing(listing.pricing.dailyRate, days, listing.pricing.depositAmount, insuranceEnrolled, listing.pricing.weekendRate, startDate)
 
   return (
     <div className="card p-5 sticky top-24">
@@ -25,7 +25,7 @@ export default function BookingSummary({ listing, startDate, endDate, days, insu
         <img src={listing.photos[0]} alt={listing.title} className="w-20 h-16 rounded-xl object-cover flex-shrink-0" />
         <div>
           <p className="font-semibold text-sm text-gray-900 line-clamp-2">{listing.title}</p>
-          <p className="text-xs text-gray-500 mt-1">{listing.location.neighborhood}, {listing.location.city}</p>
+          <p className="text-xs text-gray-500 mt-1">{formatLocation(listing.location.neighborhood, listing.location.city)}</p>
           <div className="flex items-center gap-1 mt-1">
             <Avatar src={listing.owner.avatarUrl} name={listing.owner.name} size="xs" />
             <span className="text-xs text-gray-500">{listing.owner.name}</span>
