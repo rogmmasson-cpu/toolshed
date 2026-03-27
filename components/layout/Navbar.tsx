@@ -2,9 +2,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useAuth, useUser, useClerk } from '@clerk/nextjs'
 import { Menu, X, Wrench, Bell, MessageSquare, User, Plus, Search } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
-import Avatar from '@/components/ui/Avatar'
 
 const navLinks = [
   { href: '/browse', label: 'Browse Tools' },
@@ -14,8 +14,20 @@ const navLinks = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
+  const { isSignedIn, isLoaded } = useAuth()
+  const { user } = useUser()
+  const { signOut } = useClerk()
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/login')
+  }
+
+  const displayName = user?.firstName ?? user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? 'Account'
+  const avatarUrl = user?.imageUrl
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm">
@@ -54,14 +66,6 @@ export default function Navbar() {
               <Search size={20} />
             </Link>
 
-            {/* Sign in (visible to new / logged-out users) */}
-            <Link
-              href="/login"
-              className="hidden sm:block px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-            >
-              Sign in
-            </Link>
-
             {/* List a tool */}
             <Link
               href="/listings/new"
@@ -71,40 +75,75 @@ export default function Navbar() {
               List a Tool
             </Link>
 
-            {/* Messages */}
-            <Link href="/messages" className="relative p-2 rounded-xl hover:bg-gray-100 text-gray-600">
-              <MessageSquare size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-500 rounded-full" />
-            </Link>
-
-            {/* Notifications */}
-            <Link href="/notifications" className="relative p-2 rounded-xl hover:bg-gray-100 text-gray-600">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-            </Link>
-
-            {/* Profile dropdown */}
-            <div className="relative group">
-              <Link href="/dashboard" className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-100">
-                <Avatar
-                  src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150&h=150&fit=crop&crop=face"
-                  name="Alex Johnson"
-                  size="sm"
-                />
+            {/* Signed-out: Sign in link */}
+            {isLoaded && !isSignedIn && (
+              <Link
+                href="/login"
+                className="hidden sm:block px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              >
+                Sign in
               </Link>
-              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-100 rounded-xl shadow-lg py-1 hidden group-hover:block z-50">
-                <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Dashboard</Link>
-                <Link href="/profile/usr_current" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Profile</Link>
-                <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Settings</Link>
-                <div className="border-t border-gray-100 my-1" />
+            )}
+
+            {/* Signed-in: Messages + Notifications + Avatar */}
+            {isLoaded && isSignedIn && (
+              <>
+              {/* Messages */}
+              <Link href="/messages" className="relative p-2 rounded-xl hover:bg-gray-100 text-gray-600">
+                <MessageSquare size={20} />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-500 rounded-full" />
+              </Link>
+
+              {/* Notifications */}
+              <Link href="/notifications" className="relative p-2 rounded-xl hover:bg-gray-100 text-gray-600">
+                <Bell size={20} />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              </Link>
+
+              {/* Profile dropdown */}
+              <div className="relative">
                 <button
-                  className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50"
-                  onClick={() => router.push('/login')}
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-100 focus:outline-none"
                 >
-                  Sign Out
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={displayName}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-white text-sm font-bold">
+                      {displayName[0].toUpperCase()}
+                    </div>
+                  )}
                 </button>
+
+                {dropdownOpen && (
+                  <>
+                    {/* Backdrop */}
+                    <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                    <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-50">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{displayName}</p>
+                        <p className="text-xs text-gray-400 truncate">{user?.emailAddresses?.[0]?.emailAddress}</p>
+                      </div>
+                      <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setDropdownOpen(false)}>Dashboard</Link>
+                      <Link href={`/profile/${user?.id ?? 'me'}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setDropdownOpen(false)}>My Profile</Link>
+                      <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setDropdownOpen(false)}>Settings</Link>
+                      <div className="border-t border-gray-100 my-1" />
+                      <button
+                        className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50"
+                        onClick={handleSignOut}
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
-            </div>
+              </>
+            )}
 
             {/* Mobile menu toggle */}
             <button
@@ -139,22 +178,36 @@ export default function Navbar() {
               + List a Tool
             </Link>
           </div>
-          <div className="flex gap-2 pt-1">
-            <Link href="/dashboard" className="flex-1 px-3 py-2 rounded-lg text-sm text-center text-gray-700 hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
-              <User size={14} className="inline mr-1" />Dashboard
-            </Link>
-            <Link href="/messages" className="flex-1 px-3 py-2 rounded-lg text-sm text-center text-gray-700 hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
-              <MessageSquare size={14} className="inline mr-1" />Messages
-            </Link>
-          </div>
-          <div className="pt-2 border-t border-gray-100 mt-1 flex gap-2">
-            <Link href="/login" className="flex-1 px-3 py-2 rounded-lg text-sm text-center text-gray-700 hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
-              Sign In
-            </Link>
-            <Link href="/signup" className="flex-1 px-3 py-2 rounded-lg text-sm text-center font-semibold text-brand-600 hover:bg-brand-50" onClick={() => setMobileOpen(false)}>
-              Sign Up Free
-            </Link>
-          </div>
+
+          {isSignedIn && (
+            <>
+              <div className="flex gap-2 pt-1">
+                <Link href="/dashboard" className="flex-1 px-3 py-2 rounded-lg text-sm text-center text-gray-700 hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
+                  <User size={14} className="inline mr-1" />Dashboard
+                </Link>
+                <Link href="/messages" className="flex-1 px-3 py-2 rounded-lg text-sm text-center text-gray-700 hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
+                  <MessageSquare size={14} className="inline mr-1" />Messages
+                </Link>
+              </div>
+              <button
+                className="w-full mt-1 px-3 py-2 rounded-lg text-sm text-center text-red-500 hover:bg-red-50"
+                onClick={() => { setMobileOpen(false); handleSignOut() }}
+              >
+                Sign Out
+              </button>
+            </>
+          )}
+
+          {!isSignedIn && (
+            <div className="pt-2 border-t border-gray-100 mt-1 flex gap-2">
+              <Link href="/login" className="flex-1 px-3 py-2 rounded-lg text-sm text-center text-gray-700 hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
+                Sign In
+              </Link>
+              <Link href="/signup" className="flex-1 px-3 py-2 rounded-lg text-sm text-center font-semibold text-brand-600 hover:bg-brand-50" onClick={() => setMobileOpen(false)}>
+                Sign Up Free
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </header>
