@@ -37,8 +37,8 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/listings/new" className="hover:text-white transition-colors">Create a Listing</Link></li>
               <li><Link href="/dashboard" className="hover:text-white transition-colors">Owner Dashboard</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Smart Pricing Guide</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Insurance & Protection</Link></li>
+              <li><Link href="/pricing-guide" className="hover:text-white transition-colors">Smart Pricing Guide</Link></li>
+              <li><Link href="/insurance" className="hover:text-white transition-colors">Insurance & Protection</Link></li>
             </ul>
           </div>
 
@@ -47,21 +47,21 @@ export default function Footer() {
             <h4 className="font-semibold text-white mb-3">ToolShed</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Trust & Safety</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Community Groups</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Careers</Link></li>
+              <li><Link href="/trust" className="hover:text-white transition-colors">Trust & Safety</Link></li>
+              <li><Link href="/groups" className="hover:text-white transition-colors">Community Groups</Link></li>
+              <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
+              <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
             </ul>
           </div>
         </div>
 
         <div className="mt-10 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-500">© 2024 ToolShed, Inc. All rights reserved.</p>
+          <p className="text-xs text-gray-500">© 2026 ToolShed, Inc. All rights reserved.</p>
           <div className="flex gap-4 text-xs text-gray-500">
-            <Link href="#" className="hover:text-white">Privacy Policy</Link>
-            <Link href="#" className="hover:text-white">Terms of Service</Link>
-            <Link href="#" className="hover:text-white">Liability Waiver</Link>
-            <Link href="#" className="hover:text-white">Cookie Policy</Link>
+            <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-white">Terms of Service</Link>
+            <Link href="/liability" className="hover:text-white">Liability Waiver</Link>
+            <Link href="/cookies" className="hover:text-white">Cookie Policy</Link>
           </div>
           <p className="text-xs text-gray-600 flex items-center gap-1">
             Made with <Heart size={10} className="text-red-400 fill-red-400" /> in Fairhaven, MA
