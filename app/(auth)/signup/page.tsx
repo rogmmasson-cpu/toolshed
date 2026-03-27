@@ -44,9 +44,9 @@ export default function SignupPage() {
           <label className="flex items-start gap-2 text-xs text-gray-500 cursor-pointer">
             <input type="checkbox" className="mt-0.5 rounded" />
             I agree to ToolShed&apos;s{' '}
-            <a href="#" className="text-brand-600 underline">Terms of Service</a>,{' '}
-            <a href="#" className="text-brand-600 underline">Privacy Policy</a>, and{' '}
-            <a href="#" className="text-brand-600 underline">Liability Waiver</a>.
+            <Link href="/terms" className="text-brand-600 underline">Terms of Service</Link>,{' '}
+            <Link href="/privacy" className="text-brand-600 underline">Privacy Policy</Link>, and{' '}
+            <Link href="/liability" className="text-brand-600 underline">Liability Waiver</Link>.
           </label>
           <Link href="/" className="block w-full text-center px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl text-sm transition-colors">
             Create Account

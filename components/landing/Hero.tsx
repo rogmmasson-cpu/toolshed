@@ -69,8 +69,17 @@ export default function Hero() {
             </button>
           </form>
 
+          {/* Sign up nudge */}
+          <p className="mt-5 text-white/70 text-sm">
+            New here?{' '}
+            <a href="/signup" className="text-white font-semibold underline underline-offset-2 hover:text-white/90 transition-colors">
+              Create a free account
+            </a>
+            {' '}to book and save tools.
+          </p>
+
           {/* Popular searches */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
             <span className="text-white/60 text-sm">Popular:</span>
             {POPULAR.map((term) => (
               <button

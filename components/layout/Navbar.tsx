@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, Wrench, Bell, MessageSquare, User, Plus, Search } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Avatar from '@/components/ui/Avatar'
@@ -15,6 +15,7 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm">
@@ -53,6 +54,14 @@ export default function Navbar() {
               <Search size={20} />
             </Link>
 
+            {/* Sign in (visible to new / logged-out users) */}
+            <Link
+              href="/login"
+              className="hidden sm:block px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            >
+              Sign in
+            </Link>
+
             {/* List a tool */}
             <Link
               href="/listings/new"
@@ -88,7 +97,12 @@ export default function Navbar() {
                 <Link href="/profile/usr_current" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Profile</Link>
                 <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Settings</Link>
                 <div className="border-t border-gray-100 my-1" />
-                <button className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50">Sign Out</button>
+                <button
+                  className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-50"
+                  onClick={() => router.push('/login')}
+                >
+                  Sign Out
+                </button>
               </div>
             </div>
 
@@ -131,6 +145,14 @@ export default function Navbar() {
             </Link>
             <Link href="/messages" className="flex-1 px-3 py-2 rounded-lg text-sm text-center text-gray-700 hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
               <MessageSquare size={14} className="inline mr-1" />Messages
+            </Link>
+          </div>
+          <div className="pt-2 border-t border-gray-100 mt-1 flex gap-2">
+            <Link href="/login" className="flex-1 px-3 py-2 rounded-lg text-sm text-center text-gray-700 hover:bg-gray-100" onClick={() => setMobileOpen(false)}>
+              Sign In
+            </Link>
+            <Link href="/signup" className="flex-1 px-3 py-2 rounded-lg text-sm text-center font-semibold text-brand-600 hover:bg-brand-50" onClick={() => setMobileOpen(false)}>
+              Sign Up Free
             </Link>
           </div>
         </div>
