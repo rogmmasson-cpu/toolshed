@@ -3,8 +3,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronRight, Check, Camera, DollarSign, Info, MapPin, LocateFixed, Loader2, X } from 'lucide-react'
 import { CATEGORIES } from '@/lib/constants/categories'
-import { ToolCategory, ToolCondition, Listing } from '@/lib/types'
-import { saveLocalListing } from '@/lib/utils/local-listings'
+import { ToolCategory, ToolCondition } from '@/lib/types'
+import { createListing } from '@/lib/actions/listings'
 import { getSmartPricingSuggestion } from '@/lib/utils/pricing'
 import { PRICING_BENCHMARKS } from '@/lib/constants/pricing-benchmarks'
 import { formatCents } from '@/lib/utils/formatting'
@@ -130,55 +130,42 @@ export default function NewListingPage() {
     true,
   ][step]
 
-  function handleSubmit() {
-    const now = new Date().toISOString()
-    const listing: Listing = {
-      id: `lst_local_${Date.now()}`,
-      ownerId: 'usr_current',
-      title: form.title,
-      description: form.description,
-      category: form.category as ToolCategory,
-      condition: form.condition as any,
-      brand: form.brand || null,
-      model: form.model || null,
-      retailValue: Number(form.retailValue) * 100 || 0,
-      photos: photos.filter(Boolean).length > 0
-        ? photos.filter(Boolean)
-        : ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&h=600&fit=crop'],
-      tags: [form.category, form.brand].filter(Boolean) as string[],
-      accessories: form.accessories ? form.accessories.split('\n').filter(Boolean) : [],
-      location: {
-        address: location.address,
-        neighborhood: location.neighborhood || '',
-        city: location.city,
-        state: location.state,
-        lat: location.lat,
-        lng: location.lng,
-      },
-      pricing: {
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handleSubmit() {
+    setSubmitting(true)
+    try {
+      const id = await createListing({
+        title: form.title,
+        category: form.category as ToolCategory,
+        description: form.description,
+        condition: form.condition as any,
+        brand: form.brand,
+        model: form.model,
+        retailValue: Number(form.retailValue) * 100 || 0,
+        accessories: form.accessories ? form.accessories.split('\n').filter(Boolean) : [],
         dailyRate: Math.round(Number(form.dailyRate) * 100) || 0,
         weekendRate: form.weekendRate ? Math.round(Number(form.weekendRate) * 100) : null,
-        weeklyRate: null,
-        monthlyRate: null,
         depositAmount: Math.round(Number(form.depositAmount) * 100) || 0,
-        insuranceAvailable: false,
-        insuranceDailyRate: null,
-      },
-      availability: {
-        blockedDates: [],
-        minRentalDays: Number(form.minRentalDays) || 1,
-        maxRentalDays: 30,
         instantBook: form.instantBook,
-      },
-      toolKit: { isBundle: false, bundledListingIds: [], bundleDiscount: 0 },
-      stats: { averageRating: 0, reviewCount: 0, totalRentals: 0, viewCount: 0 },
-      status: 'active',
-      publishedAt: now,
-      createdAt: now,
-      updatedAt: now,
+        minRentalDays: Number(form.minRentalDays) || 1,
+        photos: photos.filter(Boolean).length > 0
+          ? photos.filter(Boolean)
+          : ['https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&h=600&fit=crop'],
+        location: {
+          address: location.address,
+          neighborhood: location.neighborhood || '',
+          city: location.city,
+          state: location.state,
+          lat: location.lat,
+          lng: location.lng,
+        },
+      })
+      router.push(`/listings/${id}`)
+    } catch (err) {
+      console.error('Failed to create listing:', err)
+      setSubmitting(false)
     }
-    saveLocalListing(listing)
-    router.push('/dashboard/listings')
   }
 
   return (
@@ -575,8 +562,8 @@ export default function NewListingPage() {
               Continue →
             </Button>
           ) : (
-            <Button className="flex-1" onClick={handleSubmit}>
-              🚀 Publish Listing
+            <Button className="flex-1" disabled={submitting} onClick={handleSubmit}>
+              {submitting ? <><Loader2 size={16} className="animate-spin" /> Publishing…</> : '🚀 Publish Listing'}
             </Button>
           )}
         </div>
