@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { DollarSign, Package, Star, TrendingUp, ArrowRight, Clock, CheckCircle2, AlertCircle } from 'lucide-react'
-import { currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { getCurrentUser } from '@/lib/mock-db/users'
 import { getListingsByOwner } from '@/lib/mock-db/listings'
 import { getBookingsByOwner, getBookingsByRenter } from '@/lib/mock-db/bookings'
@@ -10,12 +10,14 @@ import TrustScoreCard from '@/components/profile/TrustScoreCard'
 import DashboardPendingRow from '@/components/dashboard/DashboardPendingRow'
 
 export default async function DashboardPage() {
+  const { userId } = await auth()
+
   const [clerkUser, mockUser, myListings, incomingBookings, myRentals] = await Promise.all([
     currentUser(),
     getCurrentUser(),
-    getListingsByOwner('usr_current'),
-    getBookingsByOwner('usr_current'),
-    getBookingsByRenter('usr_current'),
+    userId ? getListingsByOwner(userId) : Promise.resolve([]),
+    userId ? getBookingsByOwner(userId) : Promise.resolve([]),
+    userId ? getBookingsByRenter(userId) : Promise.resolve([]),
   ])
 
   const displayName = clerkUser?.firstName ?? clerkUser?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? mockUser.name.split(' ')[0]
