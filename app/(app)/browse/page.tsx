@@ -5,11 +5,12 @@ import ListingCard from '@/components/listings/ListingCard'
 import ListingFilters from '@/components/listings/ListingFilters'
 import MobileFilterDrawer from '@/components/listings/MobileFilterDrawer'
 import { ListingCardSkeleton } from '@/components/ui/Skeleton'
-import { Search } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 
 interface BrowsePageProps {
   searchParams: Promise<{
     q?: string
+    zip?: string
     category?: string
     minPrice?: string
     maxPrice?: string
@@ -51,34 +52,39 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   const activeFiltersCount = [filters.category, filters.minPrice, filters.maxPrice, filters.instantBookOnly, filters.condition].filter(Boolean).length
 
+  // Build the page heading
+  const headingParts: string[] = []
+  if (params.q) headingParts.push(`"${params.q}"`)
+  if (params.category) headingParts.push(params.category.replace(/-/g, ' '))
+  const heading = headingParts.length > 0 ? `Results for ${headingParts.join(' · ')}` : 'All Tools'
+
   return (
     <div className="container-app py-8">
-      {/* Search bar */}
-      <div className="mb-6">
-        <form action="/browse" method="GET" className="flex gap-3">
-          <div className="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm">
-            <Search size={18} className="text-gray-400" />
-            <input
-              name="q"
-              defaultValue={params.q}
-              placeholder="Search tools, brands, keywords..."
-              className="flex-1 text-sm text-gray-900 outline-none placeholder-gray-400"
-            />
-          </div>
-          <button type="submit" className="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl text-sm transition-colors">
-            Search
-          </button>
-        </form>
-      </div>
+      {/* Active search context banner */}
+      {(params.q || params.zip) && (
+        <div className="flex flex-wrap items-center gap-2 mb-5 text-sm text-gray-600">
+          {params.q && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-50 border border-brand-200 text-brand-700 rounded-full font-medium">
+              🔍 {params.q}
+            </span>
+          )}
+          {params.zip && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 border border-gray-200 text-gray-700 rounded-full font-medium">
+              <MapPin size={12} /> near {params.zip}
+            </span>
+          )}
+          <a href="/browse" className="text-xs text-gray-400 hover:text-gray-600 underline">Clear</a>
+        </div>
+      )}
 
-      {/* Title + count + mobile filter trigger */}
+      {/* Title + mobile filter trigger */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-gray-900">
-          {params.q ? `Results for "${params.q}"` : params.category ? `${params.category.replace('-', ' ')} tools` : 'All Tools'}
-        </h1>
+        <h1 className="text-xl font-bold text-gray-900">{heading}</h1>
         <div className="flex items-center gap-3">
           {activeFiltersCount > 0 && (
-            <span className="badge bg-brand-100 text-brand-700 hidden lg:inline-flex">{activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''} active</span>
+            <span className="badge bg-brand-100 text-brand-700 hidden lg:inline-flex">
+              {activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''} active
+            </span>
           )}
           <Suspense>
             <MobileFilterDrawer activeFiltersCount={activeFiltersCount} />
