@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowLeft, QrCode, Star, AlertTriangle, CheckCircle2, Clock, Package, Scale } from 'lucide-react'
+import { auth } from '@clerk/nextjs/server'
 import { getBookingsByRenter } from '@/lib/mock-db/bookings'
 import { getListingById } from '@/lib/mock-db/listings'
 import { formatCents, formatDateRange, formatDuration } from '@/lib/utils/formatting'
@@ -15,7 +16,8 @@ const STATUS_CONFIG = {
 }
 
 export default async function RentalsPage() {
-  const bookings = await getBookingsByRenter('usr_current')
+  const { userId } = await auth()
+  const bookings = userId ? await getBookingsByRenter(userId) : []
 
   const active    = bookings.filter(b => b.status === 'active')
   const upcoming  = bookings.filter(b => b.status === 'pending' || b.status === 'approved')

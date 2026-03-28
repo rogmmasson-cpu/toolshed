@@ -3,11 +3,14 @@ import { CheckCircle2, QrCode, MessageSquare, Calendar } from 'lucide-react'
 
 export default async function ConfirmationPage({ params, searchParams }: {
   params: Promise<{ listingId: string }>
-  searchParams: Promise<{ start?: string; end?: string }>
+  searchParams: Promise<{ start?: string; end?: string; bookingId?: string }>
 }) {
   const { listingId } = await params
   const sp = await searchParams
-  const confirmationCode = `TS-${Date.now().toString(36).toUpperCase()}`
+  const confirmationCode = sp.bookingId
+    ? sp.bookingId.slice(-8).toUpperCase()
+    : `TS-${Date.now().toString(36).toUpperCase()}`
+  const bookingId = sp.bookingId
 
   return (
     <div className="container-app py-16 max-w-lg mx-auto text-center">
@@ -31,13 +34,23 @@ export default async function ConfirmationPage({ params, searchParams }: {
       </div>
 
       <div className="grid grid-cols-1 gap-3 mb-8">
-        <div className="flex items-center gap-3 bg-brand-50 rounded-xl p-4 text-left">
-          <QrCode size={24} className="text-brand-500 flex-shrink-0" />
-          <div>
-            <p className="font-semibold text-sm text-gray-900">QR Check-In Ready</p>
-            <p className="text-xs text-gray-500">Show your QR code to the owner to confirm pickup</p>
+        {bookingId ? (
+          <Link href={`/bookings/${bookingId}/checkin`} className="flex items-center gap-3 bg-brand-50 rounded-xl p-4 text-left hover:bg-brand-100 transition-colors">
+            <QrCode size={24} className="text-brand-500 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-sm text-gray-900">QR Check-In Ready</p>
+              <p className="text-xs text-gray-500">Show your QR code to the owner to confirm pickup</p>
+            </div>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3 bg-brand-50 rounded-xl p-4 text-left">
+            <QrCode size={24} className="text-brand-500 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-sm text-gray-900">QR Check-In Ready</p>
+              <p className="text-xs text-gray-500">Show your QR code to the owner to confirm pickup</p>
+            </div>
           </div>
-        </div>
+        )}
         <div className="flex items-center gap-3 bg-blue-50 rounded-xl p-4 text-left">
           <MessageSquare size={24} className="text-blue-500 flex-shrink-0" />
           <div>

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowLeft, Clock } from 'lucide-react'
+import { auth } from '@clerk/nextjs/server'
 import { getBookingsByOwner } from '@/lib/mock-db/bookings'
 import { getListingById } from '@/lib/mock-db/listings'
 import { getUserById } from '@/lib/mock-db/users'
@@ -9,7 +10,8 @@ import Badge from '@/components/ui/Badge'
 import RequestCard from '@/components/dashboard/RequestCard'
 
 export default async function RequestsPage() {
-  const bookings = await getBookingsByOwner('usr_current')
+  const { userId } = await auth()
+  const bookings = userId ? await getBookingsByOwner(userId) : []
   const pending  = bookings.filter(b => b.status === 'pending')
   const approved = bookings.filter(b => b.status === 'approved' || b.status === 'active')
   const past     = bookings.filter(b => b.status === 'completed' || b.status === 'cancelled')
