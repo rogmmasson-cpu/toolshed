@@ -1,54 +1,38 @@
 'use client'
 import { useRouter } from 'next/navigation'
+import { useTransition } from 'react'
 import { MessageSquare } from 'lucide-react'
-import { getOrCreateConversation } from '@/lib/utils/local-messages'
+import { getOrCreateConversation } from '@/lib/actions/messages'
 
 interface Props {
   listingId: string
-  listingTitle: string
-  listingPhoto: string
-  listingDailyRate: number
-  listingNeighborhood: string
-  listingCity: string
-  ownerUserId: string
+  ownerId: string
   ownerName: string
-  ownerAvatar: string | null
+  currentUserId: string | null
 }
 
-export default function MessageOwnerButton({
-  listingId, listingTitle, listingPhoto, listingDailyRate,
-  listingNeighborhood, listingCity, ownerUserId, ownerName, ownerAvatar,
-}: Props) {
+export default function MessageOwnerButton({ listingId, ownerId, ownerName, currentUserId }: Props) {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
 
-  // Don't show if the current user is the owner
-  if (ownerUserId === 'usr_current') return null
+  // Hide if viewer is the owner or not logged in
+  if (!currentUserId || currentUserId === ownerId) return null
 
   function handleClick() {
-    const conv = getOrCreateConversation({
-      listingId,
-      listingTitle,
-      listingPhoto,
-      listingDailyRate,
-      listingNeighborhood,
-      listingCity,
-      ownerUserId,
-      ownerName,
-      ownerAvatar,
-      renterUserId: 'usr_current',
-      renterName: 'You',
-      renterAvatar: null,
+    startTransition(async () => {
+      const convId = await getOrCreateConversation(listingId, ownerId)
+      router.push(`/messages/${convId}`)
     })
-    router.push(`/messages/${conv.id}`)
   }
 
   return (
     <button
       onClick={handleClick}
-      className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-brand-300 hover:bg-brand-50 text-brand-600 font-semibold text-sm rounded-xl transition-colors"
+      disabled={isPending}
+      className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-brand-300 hover:bg-brand-50 text-brand-600 font-semibold text-sm rounded-xl transition-colors disabled:opacity-60"
     >
       <MessageSquare size={15} />
-      Message {ownerName.split(' ')[0]}
+      {isPending ? 'Opening…' : `Message ${ownerName.split(' ')[0]}`}
     </button>
   )
 }

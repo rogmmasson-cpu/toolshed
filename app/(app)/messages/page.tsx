@@ -1,54 +1,13 @@
-'use client'
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MessageSquare } from 'lucide-react'
-import { getConversations, LocalConversation, markConversationRead } from '@/lib/utils/local-messages'
-import { MOCK_CONVERSATIONS } from '@/lib/data/mock-messages'
-import { MOCK_USERS } from '@/lib/data/mock-users'
-import { MOCK_LISTINGS } from '@/lib/data/mock-listings'
+import { auth } from '@clerk/nextjs/server'
+import { getConversationsForUser } from '@/lib/mock-db/messages'
 import Avatar from '@/components/ui/Avatar'
-import { timeAgo, formatCents } from '@/lib/utils/formatting'
+import { timeAgo } from '@/lib/utils/formatting'
 
-// Normalise mock conversations for display alongside localStorage ones
-function buildMockDisplayConvs() {
-  return MOCK_CONVERSATIONS.map(c => {
-    const otherId = c.participantIds.find(id => id !== 'usr_current')!
-    const other = MOCK_USERS.find(u => u.id === otherId)
-    const listing = c.listingId ? MOCK_LISTINGS.find(l => l.id === c.listingId) : null
-    return {
-      id: c.id,
-      otherName: other?.name ?? 'Unknown',
-      otherAvatar: other?.avatarUrl ?? null,
-      listingTitle: listing?.title ?? null,
-      listingPhoto: listing?.photos[0] ?? null,
-      lastMessagePreview: c.lastMessagePreview,
-      lastMessageAt: c.lastMessageAt,
-      unreadCount: 0,
-    }
-  })
-}
-
-export default function MessagesPage() {
-  const [localConvs, setLocalConvs] = useState<LocalConversation[]>([])
-
-  useEffect(() => { setLocalConvs(getConversations()) }, [])
-
-  const localDisplay = localConvs.map(c => ({
-    id: c.id,
-    otherName: c.ownerUserId === 'usr_current' ? c.renterName : c.ownerName,
-    otherAvatar: c.ownerUserId === 'usr_current' ? c.renterAvatar : c.ownerAvatar,
-    listingTitle: c.listingTitle,
-    listingPhoto: c.listingPhoto,
-    lastMessagePreview: c.lastMessagePreview || 'No messages yet — say hello!',
-    lastMessageAt: c.lastMessageAt,
-    unreadCount: c.unreadCount,
-  }))
-
-  const mockDisplay = buildMockDisplayConvs()
-  const all = [
-    ...localDisplay,
-    ...mockDisplay,
-  ].sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime())
+export default async function MessagesPage() {
+  const { userId } = await auth()
+  const convs = userId ? await getConversationsForUser(userId) : []
 
   return (
     <div className="container-app py-8 max-w-2xl">
@@ -56,7 +15,7 @@ export default function MessagesPage() {
         <MessageSquare size={24} className="text-brand-500" /> Messages
       </h1>
 
-      {all.length === 0 ? (
+      {convs.length === 0 ? (
         <div className="card p-12 text-center">
           <MessageSquare size={40} className="text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">No messages yet.</p>
@@ -66,38 +25,46 @@ export default function MessagesPage() {
         </div>
       ) : (
         <div className="card divide-y divide-gray-100">
-          {all.map(conv => (
-            <Link
-              key={conv.id}
-              href={`/messages/${conv.id}`}
-              className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors"
-            >
-              <div className="relative flex-shrink-0">
-                {conv.listingPhoto ? (
-                  <img src={conv.listingPhoto} alt="" className="w-12 h-12 rounded-xl object-cover" />
-                ) : (
-                  <Avatar src={conv.otherAvatar} name={conv.otherName} size="md" />
-                )}
-                {conv.unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-brand-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                    {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
-                  </span>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-semibold text-sm text-gray-900 truncate">{conv.otherName}</p>
-                  <span className="text-xs text-gray-400 flex-shrink-0">{timeAgo(conv.lastMessageAt)}</span>
+          {convs.map(conv => {
+            const other = conv.participants.find(p => p.id !== userId)
+            return (
+              <Link
+                key={conv.id}
+                href={`/messages/${conv.id}`}
+                className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex-shrink-0">
+                  {conv.listing?.photos[0] ? (
+                    <img
+                      src={conv.listing.photos[0]}
+                      alt=""
+                      className="w-12 h-12 rounded-xl object-cover"
+                    />
+                  ) : (
+                    <Avatar src={other?.avatarUrl ?? null} name={other?.name ?? 'User'} size="md" />
+                  )}
                 </div>
-                {conv.listingTitle && (
-                  <p className="text-xs text-brand-600 font-medium truncate">{conv.listingTitle}</p>
-                )}
-                <p className={`text-sm truncate mt-0.5 ${conv.unreadCount > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
-                  {conv.lastMessagePreview}
-                </p>
-              </div>
-            </Link>
-          ))}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-semibold text-sm text-gray-900 truncate">
+                      {other?.name ?? 'User'}
+                    </p>
+                    <span className="text-xs text-gray-400 flex-shrink-0">
+                      {timeAgo(conv.lastMessageAt)}
+                    </span>
+                  </div>
+                  {conv.listing && (
+                    <p className="text-xs text-brand-600 font-medium truncate">
+                      {conv.listing.title}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-500 truncate mt-0.5">
+                    {conv.lastMessagePreview || 'No messages yet — say hello!'}
+                  </p>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>

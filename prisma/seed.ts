@@ -17,6 +17,55 @@ const MOCK_USERS = [
   { id: 'usr_5', name: 'Tom Brennan', email: 'tom@example.com', avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face', bio: 'General contractor. Tools are my trade — happy to share.', locationCity: 'Marion', locationState: 'MA', locationNeighborhood: 'Marion Village', locationLat: 41.698, locationLng: -70.762, trustScore: 85, badges: ['email', 'phone', 'id'], responseRate: 0.91, responseTimeHours: 6, totalListings: 6, totalRentals: 5, totalLends: 28 },
 ]
 
+const MOCK_CONVERSATIONS = [
+  {
+    id: 'conv_1',
+    participantIds: ['usr_1', 'usr_3'],
+    listingId: 'lst_4',
+    bookingId: null,
+    lastMessageAt: new Date('2024-01-23T17:30:00Z'),
+    lastMessagePreview: 'Thanks for returning it — deposit released!',
+  },
+  {
+    id: 'conv_3',
+    participantIds: ['usr_2', 'usr_4'],
+    listingId: 'lst_6',
+    bookingId: null,
+    lastMessageAt: new Date('2024-04-10T09:15:00Z'),
+    lastMessagePreview: 'Enjoy the mower! LMK if you have any questions.',
+  },
+  {
+    id: 'conv_4',
+    participantIds: ['usr_1', 'usr_4'],
+    listingId: 'lst_2',
+    bookingId: null,
+    lastMessageAt: new Date('2024-04-14T11:00:00Z'),
+    lastMessagePreview: "Hey! Looks good — I'll approve this shortly.",
+  },
+  {
+    id: 'conv_5',
+    participantIds: ['usr_4', 'usr_5'],
+    listingId: 'lst_5',
+    bookingId: null,
+    lastMessageAt: new Date('2024-04-12T14:00:00Z'),
+    lastMessagePreview: 'Is the ladder available the weekend of the 27th?',
+  },
+]
+
+const MOCK_SEED_MESSAGES = [
+  { id: 'msg_1', conversationId: 'conv_1', senderId: 'usr_1', content: 'Hi David! Is the pressure washer available Jan 22nd? I want to clean my driveway.', createdAt: new Date('2024-01-21T17:00:00Z') },
+  { id: 'msg_2', conversationId: 'conv_1', senderId: 'usr_3', content: "Yes, it's free! Just make sure you book through the app so the deposit is handled properly. See you the 22nd.", createdAt: new Date('2024-01-21T17:25:00Z') },
+  { id: 'msg_3', conversationId: 'conv_1', senderId: 'usr_1', content: "Perfect, booking now! Quick question — does it come with the soap dispenser attachment?", createdAt: new Date('2024-01-21T17:32:00Z') },
+  { id: 'msg_4', conversationId: 'conv_1', senderId: 'usr_3', content: "Yes! Two detergent tanks included. Great for soap-and-rinse on the same pass.", createdAt: new Date('2024-01-21T17:58:00Z') },
+  { id: 'msg_5', conversationId: 'conv_1', senderId: 'usr_3', content: 'Thanks for returning it — deposit released!', createdAt: new Date('2024-01-23T17:30:00Z') },
+  { id: 'msg_6', conversationId: 'conv_3', senderId: 'usr_2', content: 'Approved your booking! The mower will be ready at 9am on the 10th.', createdAt: new Date('2024-04-09T19:30:00Z') },
+  { id: 'msg_7', conversationId: 'conv_3', senderId: 'usr_4', content: "Great, I'll be there at 9. Thanks!", createdAt: new Date('2024-04-09T20:15:00Z') },
+  { id: 'msg_8', conversationId: 'conv_3', senderId: 'usr_2', content: 'Enjoy the mower! LMK if you have any questions.', createdAt: new Date('2024-04-10T09:15:00Z') },
+  { id: 'msg_9', conversationId: 'conv_4', senderId: 'usr_4', content: "Hi Marcus! I'd love to rent the DeWalt drill for the weekend.", createdAt: new Date('2024-04-14T10:45:00Z') },
+  { id: 'msg_10', conversationId: 'conv_4', senderId: 'usr_1', content: "Hey! Looks good — I'll approve this shortly.", createdAt: new Date('2024-04-14T11:00:00Z') },
+  { id: 'msg_11', conversationId: 'conv_5', senderId: 'usr_4', content: 'Is the ladder available the weekend of the 27th?', createdAt: new Date('2024-04-12T14:00:00Z') },
+]
+
 async function main() {
   console.log('Seeding database...')
 
@@ -116,6 +165,52 @@ async function main() {
     })
   }
   console.log(`Seeded ${MOCK_LISTINGS.length} listings`)
+
+  // Upsert conversations
+  for (const c of MOCK_CONVERSATIONS) {
+    await prisma.conversation.upsert({
+      where: { id: c.id },
+      update: {
+        participantIds: c.participantIds,
+        listingId: c.listingId,
+        bookingId: c.bookingId,
+        lastMessageAt: c.lastMessageAt,
+        lastMessagePreview: c.lastMessagePreview,
+      },
+      create: {
+        id: c.id,
+        participantIds: c.participantIds,
+        listingId: c.listingId,
+        bookingId: c.bookingId,
+        lastMessageAt: c.lastMessageAt,
+        lastMessagePreview: c.lastMessagePreview,
+      },
+    })
+  }
+  console.log(`Seeded ${MOCK_CONVERSATIONS.length} conversations`)
+
+  // Upsert messages
+  for (const m of MOCK_SEED_MESSAGES) {
+    await prisma.message.upsert({
+      where: { id: m.id },
+      update: {
+        conversationId: m.conversationId,
+        senderId: m.senderId,
+        content: m.content,
+        attachments: [],
+        createdAt: m.createdAt,
+      },
+      create: {
+        id: m.id,
+        conversationId: m.conversationId,
+        senderId: m.senderId,
+        content: m.content,
+        attachments: [],
+        createdAt: m.createdAt,
+      },
+    })
+  }
+  console.log(`Seeded ${MOCK_SEED_MESSAGES.length} messages`)
   console.log('Done.')
 }
 

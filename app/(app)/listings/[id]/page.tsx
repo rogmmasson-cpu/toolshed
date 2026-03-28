@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { MapPin, Package, CheckCircle2, ArrowLeft, Users, Clock, Lock } from 'lucide-react'
+import { auth } from '@clerk/nextjs/server'
 import LocalListingView from '@/components/listings/LocalListingView'
 import { getListingById, getSimilarListings } from '@/lib/mock-db/listings'
 import { getReviewsForListing } from '@/lib/mock-db/reviews'
@@ -33,7 +34,8 @@ export default async function ListingDetailPage({ params }: Props) {
   const listing = await getListingById(id)
   if (!listing) notFound()
 
-  const [reviews, similar, owner] = await Promise.all([
+  const [{ userId }, reviews, similar, owner] = await Promise.all([
+    auth(),
     getReviewsForListing(id),
     getSimilarListings(listing),
     getUserById(listing.ownerId),
@@ -88,14 +90,9 @@ export default async function ListingDetailPage({ params }: Props) {
             </Link>
             <MessageOwnerButton
               listingId={listing.id}
-              listingTitle={listing.title}
-              listingPhoto={listing.photos[0]}
-              listingDailyRate={listing.pricing.dailyRate}
-              listingNeighborhood={listing.location.neighborhood}
-              listingCity={listing.location.city}
-              ownerUserId={listing.ownerId}
+              ownerId={listing.ownerId}
               ownerName={listing.owner.name}
-              ownerAvatar={listing.owner.avatarUrl}
+              currentUserId={userId ?? null}
             />
           </div>
 

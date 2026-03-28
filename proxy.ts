@@ -1,19 +1,31 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-  '/messages(.*)',
-  '/notifications(.*)',
-  '/settings(.*)',
-  '/listings/new(.*)',
-  '/book(.*)',
-  '/bookings(.*)',
-  '/wishlist(.*)',
+// Routes anyone can visit without logging in
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/login(.*)',
+  '/signup(.*)',
+  '/browse(.*)',
+  '/listings/:id',
+  '/about(.*)',
+  '/trust(.*)',
+  '/pricing-guide(.*)',
+  '/insurance(.*)',
+  '/blog(.*)',
+  '/careers(.*)',
+  '/privacy(.*)',
+  '/terms(.*)',
+  '/liability(.*)',
+  '/cookies(.*)',
   '/groups(.*)',
+  '/profile/(.*)',
+  '/api/upload',
 ])
 
 export const proxy = clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) await auth.protect()
+  if (!isPublicRoute(req)) {
+    await auth.protect()
+  }
 })
 
 export const config = {
