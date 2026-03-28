@@ -1,9 +1,11 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import Badge from '@/components/ui/Badge'
+import { approveBooking, declineBooking } from '@/lib/actions/bookings'
 import { formatCents, formatDateRange, formatDuration, timeAgo } from '@/lib/utils/formatting'
 import type { Booking, Listing, User } from '@/lib/types'
 
@@ -13,34 +15,36 @@ interface RequestCardProps {
   renter: User | null
 }
 
-type Decision = 'approved' | 'declined' | null
-
-function storageKey(id: string) {
-  return `toolshed_booking_decision_${id}`
-}
-
 export default function RequestCard({ booking, listing, renter }: RequestCardProps) {
-  const [decision, setDecision] = useState<Decision>(null)
-  const [loading, setLoading] = useState<'approve' | 'decline' | null>(null)
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [action, setAction] = useState<'approve' | 'decline' | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  // Rehydrate from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(storageKey(booking.id)) as Decision | null
-    if (stored) setDecision(stored)
-  }, [booking.id])
+  // Reflect the booking's real status if it's already been decided
+  const alreadyApproved = booking.status === 'approved' || booking.status === 'active'
+  const alreadyDeclined = booking.status === 'cancelled'
 
-  function decide(action: 'approved' | 'declined') {
-    setLoading(action === 'approved' ? 'approve' : 'decline')
-    // Simulate a short async op so the spinner feels real
-    setTimeout(() => {
-      localStorage.setItem(storageKey(booking.id), action)
-      setDecision(action)
-      setLoading(null)
-    }, 600)
+  function decide(next: 'approve' | 'decline') {
+    setAction(next)
+    setError(null)
+    startTransition(async () => {
+      try {
+        if (next === 'approve') {
+          await approveBooking(booking.id)
+        } else {
+          await declineBooking(booking.id)
+        }
+        router.refresh()
+      } catch (err: any) {
+        setError(err.message ?? 'Something went wrong')
+        setAction(null)
+      }
+    })
   }
 
-  // Approved state — show compact confirmed row
-  if (decision === 'approved') {
+  // Approved state — compact confirmed row
+  if (alreadyApproved || action === 'approve') {
     return (
       <div className="card p-4 flex gap-3 items-center border-l-4 border-forest-400">
         {listing?.photos[0] && (
@@ -57,7 +61,7 @@ export default function RequestCard({ booking, listing, renter }: RequestCardPro
   }
 
   // Declined state — muted row
-  if (decision === 'declined') {
+  if (alreadyDeclined || action === 'decline') {
     return (
       <div className="card p-4 flex gap-3 items-center opacity-50">
         {listing?.photos[0] && (
@@ -73,7 +77,7 @@ export default function RequestCard({ booking, listing, renter }: RequestCardPro
     )
   }
 
-  // Default — pending card with action buttons
+  // Pending — full card with action buttons
   return (
     <div className="card p-5 border-l-4 border-yellow-400">
       <div className="flex items-start gap-4">
@@ -102,13 +106,15 @@ export default function RequestCard({ booking, listing, renter }: RequestCardPro
         </div>
       </div>
 
+      {error && <p className="mt-3 text-xs text-red-600 font-medium">{error}</p>}
+
       <div className="flex gap-2 mt-4">
         <button
-          onClick={() => decide('approved')}
-          disabled={!!loading}
+          onClick={() => decide('approve')}
+          disabled={isPending}
           className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-forest-500 hover:bg-forest-600 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
         >
-          {loading === 'approve' ? (
+          {isPending && action === 'approve' ? (
             <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
           ) : (
             <CheckCircle2 size={15} />
@@ -116,11 +122,11 @@ export default function RequestCard({ booking, listing, renter }: RequestCardPro
           Approve
         </button>
         <button
-          onClick={() => decide('declined')}
-          disabled={!!loading}
+          onClick={() => decide('decline')}
+          disabled={isPending}
           className="flex items-center justify-center gap-1.5 px-4 py-2 border border-gray-200 hover:bg-gray-50 disabled:opacity-60 text-gray-600 text-sm font-semibold rounded-xl transition-colors"
         >
-          {loading === 'decline' ? (
+          {isPending && action === 'decline' ? (
             <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
           ) : (
             <XCircle size={15} />

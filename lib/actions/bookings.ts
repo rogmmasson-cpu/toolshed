@@ -82,3 +82,31 @@ export async function createBooking(input: CreateBookingInput): Promise<string> 
 
   return booking.id
 }
+
+export async function approveBooking(bookingId: string): Promise<void> {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Not authenticated')
+
+  const booking = await db.booking.findUnique({ where: { id: bookingId } })
+  if (!booking) throw new Error('Booking not found')
+  if (booking.ownerId !== userId) throw new Error('Unauthorized')
+
+  await db.booking.update({
+    where: { id: bookingId },
+    data: { status: 'approved' },
+  })
+}
+
+export async function declineBooking(bookingId: string): Promise<void> {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Not authenticated')
+
+  const booking = await db.booking.findUnique({ where: { id: bookingId } })
+  if (!booking) throw new Error('Booking not found')
+  if (booking.ownerId !== userId) throw new Error('Unauthorized')
+
+  await db.booking.update({
+    where: { id: bookingId },
+    data: { status: 'cancelled' },
+  })
+}

@@ -12,17 +12,17 @@ import DashboardPendingRow from '@/components/dashboard/DashboardPendingRow'
 export default async function DashboardPage() {
   const { userId } = await auth()
 
-  const [clerkUser, mockUser, myListings, incomingBookings, myRentals] = await Promise.all([
+  const [clerkUser, dbUser, myListings, incomingBookings, myRentals] = await Promise.all([
     currentUser(),
-    getCurrentUser(),
+    userId ? getCurrentUser(userId) : Promise.resolve(null),
     userId ? getListingsByOwner(userId) : Promise.resolve([]),
     userId ? getBookingsByOwner(userId) : Promise.resolve([]),
     userId ? getBookingsByRenter(userId) : Promise.resolve([]),
   ])
 
-  const displayName = clerkUser?.firstName ?? clerkUser?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? mockUser.name.split(' ')[0]
-  const displayAvatar = clerkUser?.imageUrl ?? mockUser.avatarUrl
-  const user = mockUser
+  const displayName = clerkUser?.firstName ?? clerkUser?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? dbUser?.name.split(' ')[0] ?? 'there'
+  const displayAvatar = clerkUser?.imageUrl ?? dbUser?.avatarUrl ?? null
+  const user = dbUser
 
   const totalEarnings = incomingBookings
     .filter((b) => b.status === 'completed')
@@ -35,7 +35,7 @@ export default async function DashboardPage() {
     { label: 'Total Earned', value: formatCents(totalEarnings), icon: <DollarSign size={20} />, color: 'text-forest-600 bg-forest-50' },
     { label: 'Active Listings', value: myListings.filter(l => l.status === 'active').length, icon: <Package size={20} />, color: 'text-brand-600 bg-brand-50' },
     { label: 'Pending Requests', value: pendingRequests.length, icon: <Clock size={20} />, color: 'text-yellow-600 bg-yellow-50' },
-    { label: 'Trust Score', value: user.trustScore, icon: <Star size={20} />, color: 'text-purple-600 bg-purple-50' },
+    { label: 'Trust Score', value: user?.trustScore ?? 0, icon: <Star size={20} />, color: 'text-purple-600 bg-purple-50' },
   ]
 
   return (
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
         <Avatar src={displayAvatar} name={displayName} size="xl" />
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Welcome back, {displayName}!</h1>
-          <p className="text-gray-500">Member since {new Date(user.memberSince).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+          <p className="text-gray-500">Member since {user?.memberSince ? new Date(user.memberSince).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'recently'}</p>
         </div>
         <Link href="/listings/new" className="ml-auto hidden sm:flex items-center gap-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl text-sm transition-colors">
           + List a Tool
@@ -150,7 +150,7 @@ export default async function DashboardPage() {
 
         {/* Trust score */}
         <div>
-          <TrustScoreCard user={user} />
+          {user && <TrustScoreCard user={user} />}
 
           <div className="card p-5 mt-4">
             <h3 className="font-semibold text-gray-900 mb-3">Quick Actions</h3>
