@@ -13,6 +13,9 @@ export type ToolCategory =
   | 'moving'
   | 'outdoor'
   | 'kitchen'
+  | 'party-rentals'
+  | 'kids'
+  | 'trailers'
   | 'other'
 
 export type ToolCondition = 'like-new' | 'excellent' | 'good' | 'fair'

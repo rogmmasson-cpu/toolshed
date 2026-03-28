@@ -1,8 +1,10 @@
 import Link from 'next/link'
-import { ArrowLeft, DollarSign, TrendingUp, Download } from 'lucide-react'
+import { ArrowLeft, DollarSign, TrendingUp } from 'lucide-react'
 import { getBookingsByOwner } from '@/lib/mock-db/bookings'
 import { getListingById } from '@/lib/mock-db/listings'
 import { formatCents, formatDateRange } from '@/lib/utils/formatting'
+import ExportCsvButton from '@/components/dashboard/ExportCsvButton'
+import type { CsvRow } from '@/components/dashboard/ExportCsvButton'
 
 const MOCK_MONTHLY = [
   { month: 'Nov', amount: 4200 },
@@ -24,6 +26,17 @@ export default async function EarningsPage() {
   const listings = await Promise.all(completed.map(b => getListingById(b.listingId)))
   const byId = Object.fromEntries(completed.map((b, i) => [b.id, listings[i]]))
 
+  const csvRows: CsvRow[] = completed.map(b => ({
+    bookingId: b.id,
+    listingTitle: byId[b.id]?.title ?? 'Unknown',
+    startDate: b.dates.startDate,
+    endDate: b.dates.endDate,
+    days: b.dates.totalDays,
+    grossCents: b.pricing.subtotal,
+    feeCents: b.pricing.platformFee,
+    netCents: b.pricing.subtotal - b.pricing.platformFee,
+  }))
+
   const max = Math.max(...MOCK_MONTHLY.map(m => m.amount))
 
   return (
@@ -35,9 +48,7 @@ export default async function EarningsPage() {
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Earnings</h1>
         </div>
-        <button className="inline-flex items-center gap-2 px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-semibold rounded-xl transition-colors">
-          <Download size={15}/>Export CSV
-        </button>
+        <ExportCsvButton rows={csvRows} />
       </div>
 
       {/* Summary */}

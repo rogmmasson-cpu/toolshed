@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getLocalListingById, updateLocalListing } from '@/lib/utils/local-listings'
+import { getLocalListingById, updateLocalListing, saveLocalListing } from '@/lib/utils/local-listings'
+import { MOCK_LISTINGS } from '@/lib/data/mock-listings'
 import { CATEGORIES } from '@/lib/constants/categories'
-import { ToolCategory, ToolCondition } from '@/lib/types'
+import { ToolCategory, ToolCondition, Listing } from '@/lib/types'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { cn } from '@/lib/utils/cn'
@@ -21,6 +22,8 @@ export default function EditListingPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
   const [notFound, setNotFound] = useState(false)
+  const [original, setOriginal] = useState<Listing | null>(null)
+  const [isInLocalStorage, setIsInLocalStorage] = useState(false)
   const [form, setForm] = useState({
     title: '',
     category: '' as ToolCategory | '',
@@ -37,8 +40,11 @@ export default function EditListingPage() {
   })
 
   useEffect(() => {
-    const listing = getLocalListingById(id)
+    const fromLocal = getLocalListingById(id)
+    const listing = fromLocal ?? MOCK_LISTINGS.find(l => l.id === id) ?? null
     if (!listing) { setNotFound(true); return }
+    setOriginal(listing)
+    setIsInLocalStorage(!!fromLocal)
     setForm({
       title: listing.title,
       category: listing.category,
@@ -65,33 +71,36 @@ export default function EditListingPage() {
   }
 
   function handleSave() {
+    if (!original) return
     const now = new Date().toISOString()
-    updateLocalListing(id, {
+    const changes = {
       title: form.title,
       description: form.description,
       category: form.category as ToolCategory,
       condition: form.condition as ToolCondition,
-      brand: form.brand || undefined,
-      model: form.model || undefined,
+      brand: form.brand || null,
+      model: form.model || null,
       retailValue: Number(form.retailValue) * 100 || 0,
       accessories: form.accessories ? form.accessories.split('\n').filter(Boolean) : [],
       pricing: {
+        ...original.pricing,
         dailyRate: Math.round(Number(form.dailyRate) * 100) || 0,
-        weekendRate: null,
-        weeklyRate: null,
-        monthlyRate: null,
         depositAmount: Math.round(Number(form.depositAmount) * 100) || 0,
-        insuranceAvailable: false,
-        insuranceDailyRate: null,
       },
       availability: {
-        blockedDates: [],
+        ...original.availability,
         minRentalDays: Number(form.minRentalDays) || 1,
-        maxRentalDays: 30,
         instantBook: form.instantBook,
       },
       updatedAt: now,
-    })
+    }
+    if (isInLocalStorage) {
+      updateLocalListing(id, changes)
+    } else {
+      // Adopt mock listing into localStorage with edits applied
+      saveLocalListing({ ...original, ...changes })
+      setIsInLocalStorage(true)
+    }
     router.push(`/listings/${id}`)
   }
 

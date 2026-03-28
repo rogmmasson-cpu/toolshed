@@ -94,6 +94,27 @@ export const CATEGORIES: CategoryDef[] = [
     color: 'bg-red-100 text-red-800',
   },
   {
+    value: 'party-rentals',
+    label: 'Party Rentals',
+    emoji: '🎉',
+    description: 'Tents, tables, chairs, canopies',
+    color: 'bg-fuchsia-100 text-fuchsia-800',
+  },
+  {
+    value: 'kids',
+    label: 'Kids & Baby',
+    emoji: '🧸',
+    description: 'Pack-n-plays, bounce houses, Power Wheels',
+    color: 'bg-rose-100 text-rose-800',
+  },
+  {
+    value: 'trailers',
+    label: 'Trailers',
+    emoji: '🚛',
+    description: 'Utility trailers, dump trailers, car haulers',
+    color: 'bg-stone-100 text-stone-800',
+  },
+  {
     value: 'other',
     label: 'Other',
     emoji: '📦',

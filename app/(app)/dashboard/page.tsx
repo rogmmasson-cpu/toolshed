@@ -7,6 +7,7 @@ import { getBookingsByOwner, getBookingsByRenter } from '@/lib/mock-db/bookings'
 import { formatCents } from '@/lib/utils/formatting'
 import Avatar from '@/components/ui/Avatar'
 import TrustScoreCard from '@/components/profile/TrustScoreCard'
+import DashboardPendingRow from '@/components/dashboard/DashboardPendingRow'
 
 export default async function DashboardPage() {
   const [clerkUser, mockUser, myListings, incomingBookings, myRentals] = await Promise.all([
@@ -78,16 +79,7 @@ export default async function DashboardPage() {
               </div>
               <div className="space-y-3">
                 {pendingRequests.slice(0, 2).map((b) => (
-                  <div key={b.id} className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Booking #{b.id.slice(-6)}</p>
-                      <p className="text-xs text-gray-500">{b.dates.startDate} → {b.dates.endDate}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="px-3 py-1 bg-forest-500 hover:bg-forest-600 text-white text-xs font-semibold rounded-lg">Approve</button>
-                      <button className="px-3 py-1 border border-gray-200 hover:bg-gray-100 text-gray-600 text-xs font-semibold rounded-lg">Decline</button>
-                    </div>
-                  </div>
+                  <DashboardPendingRow key={b.id} booking={b} />
                 ))}
               </div>
             </div>

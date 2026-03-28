@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Eye, Pause, Play, Edit3, TrendingUp, Star, CalendarDays } from 'lucide-react'
 import { MOCK_LISTINGS } from '@/lib/data/mock-listings'
-import { getLocalListings, updateLocalListing } from '@/lib/utils/local-listings'
+import { getLocalListings, updateLocalListing, saveLocalListing } from '@/lib/utils/local-listings'
 import { formatCents } from '@/lib/utils/formatting'
 import Badge from '@/components/ui/Badge'
 import { Listing } from '@/lib/types'
@@ -19,14 +19,21 @@ export default function ManageListingsPage() {
     setLocalListings(getLocalListings())
   }, [])
 
-  function toggleStatus(id: string, current: string) {
+  function toggleStatus(id: string, current: string, listing: Listing) {
     const next = current === 'active' ? 'paused' : 'active'
-    updateLocalListing(id, { status: next as any })
+    const inLocal = localListings.some(l => l.id === id)
+    if (inLocal) {
+      updateLocalListing(id, { status: next as any })
+    } else {
+      saveLocalListing({ ...listing, status: next as any })
+    }
     setLocalListings(getLocalListings())
   }
 
   const mockListings = getMockOwnerListings()
-  const all = [...localListings, ...mockListings]
+  // Deduplicate: if a mock listing has been adopted into localStorage, use that version
+  const localIds = new Set(localListings.map(l => l.id))
+  const all = [...localListings, ...mockListings.filter(l => !localIds.has(l.id))]
 
   return (
     <div className="container-app py-8 max-w-4xl">
@@ -66,7 +73,7 @@ export default function ManageListingsPage() {
 
       <div className="space-y-3">
         {all.map(listing => {
-          const isLocal = listing.id.startsWith('lst_local_')
+          const isNew = listing.id.startsWith('lst_local_')
           return (
             <div key={listing.id} className="card p-4 flex gap-4">
               <img src={listing.photos[0]} alt={listing.title} className="w-24 h-20 rounded-xl object-cover flex-shrink-0"/>
@@ -75,7 +82,7 @@ export default function ManageListingsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-semibold text-gray-900 truncate">{listing.title}</p>
-                      {isLocal && <span className="text-xs bg-brand-50 text-brand-600 px-2 py-0.5 rounded-full font-medium">New</span>}
+                      {isNew && <span className="text-xs bg-brand-50 text-brand-600 px-2 py-0.5 rounded-full font-medium">New</span>}
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">{listing.location.neighborhood} · {formatCents(listing.pricing.dailyRate)}/day</p>
                   </div>
@@ -102,28 +109,18 @@ export default function ManageListingsPage() {
                   >
                     <CalendarDays size={11}/>Availability
                   </Link>
-                  {isLocal ? (
-                    <>
-                      <Link href={`/listings/${listing.id}/edit`} className="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-semibold rounded-lg transition-colors">
-                        <Edit3 size={11}/>Edit
-                      </Link>
-                      <button
-                        onClick={() => toggleStatus(listing.id, listing.status)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-semibold rounded-lg transition-colors"
-                      >
-                        {listing.status === 'active' ? <><Pause size={11}/>Pause</> : <><Play size={11}/>Activate</>}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-semibold rounded-lg transition-colors">
-                        <Edit3 size={11}/>Edit
-                      </button>
-                      <button className="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-semibold rounded-lg transition-colors">
-                        <Pause size={11}/>{listing.status === 'active' ? 'Pause' : 'Activate'}
-                      </button>
-                    </>
-                  )}
+                  <Link
+                    href={`/listings/${listing.id}/edit`}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-semibold rounded-lg transition-colors"
+                  >
+                    <Edit3 size={11}/>Edit
+                  </Link>
+                  <button
+                    onClick={() => toggleStatus(listing.id, listing.status, listing)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-semibold rounded-lg transition-colors"
+                  >
+                    {listing.status === 'active' ? <><Pause size={11}/>Pause</> : <><Play size={11}/>Activate</>}
+                  </button>
                 </div>
               </div>
             </div>

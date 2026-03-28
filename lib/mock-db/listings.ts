@@ -1,94 +1,169 @@
-import { MOCK_LISTINGS } from '@/lib/data/mock-listings'
-import { MOCK_USERS } from '@/lib/data/mock-users'
-import { Listing, ListingWithOwner, SearchFilters, ToolCategory } from '@/lib/types'
+import { db } from '@/lib/db'
+import { Listing, ListingWithOwner, SearchFilters, ToolCategory, ToolCondition } from '@/lib/types'
+import type { Listing as PrismaListing, User as PrismaUser } from '@prisma/client'
 
-function attachOwner(listing: Listing): ListingWithOwner {
-  const owner = MOCK_USERS.find((u) => u.id === listing.ownerId)!
+type PrismaListingWithOwner = PrismaListing & {
+  owner: Pick<PrismaUser, 'id' | 'name' | 'avatarUrl' | 'trustScore' | 'badges' | 'responseRate'>
+}
+
+const ownerSelect = {
+  id: true,
+  name: true,
+  avatarUrl: true,
+  trustScore: true,
+  badges: true,
+  responseRate: true,
+}
+
+function toListing(r: PrismaListing): Listing {
   return {
-    ...listing,
+    id: r.id,
+    ownerId: r.ownerId,
+    title: r.title,
+    description: r.description,
+    category: r.category as ToolCategory,
+    condition: r.condition as ToolCondition,
+    brand: r.brand,
+    model: r.model,
+    retailValue: r.retailValue,
+    photos: r.photos,
+    tags: r.tags,
+    accessories: r.accessories,
+    location: {
+      address: r.locationAddress,
+      neighborhood: r.locationNeighborhood,
+      city: r.locationCity,
+      state: r.locationState,
+      lat: r.locationLat,
+      lng: r.locationLng,
+    },
+    pricing: {
+      dailyRate: r.dailyRate,
+      weekendRate: r.weekendRate,
+      weeklyRate: r.weeklyRate,
+      monthlyRate: r.monthlyRate,
+      depositAmount: r.depositAmount,
+      insuranceAvailable: r.insuranceAvailable,
+      insuranceDailyRate: r.insuranceDailyRate,
+    },
+    availability: {
+      blockedDates: r.blockedDates,
+      minRentalDays: r.minRentalDays,
+      maxRentalDays: r.maxRentalDays,
+      instantBook: r.instantBook,
+    },
+    toolKit: {
+      isBundle: r.isBundle,
+      bundledListingIds: r.bundledListingIds,
+      bundleDiscount: r.bundleDiscount,
+    },
+    stats: {
+      averageRating: r.averageRating,
+      reviewCount: r.reviewCount,
+      totalRentals: r.totalRentals,
+      viewCount: r.viewCount,
+    },
+    status: r.status as Listing['status'],
+    publishedAt: r.publishedAt ? r.publishedAt.toISOString() : null,
+    createdAt: r.createdAt.toISOString(),
+    updatedAt: r.updatedAt.toISOString(),
+  }
+}
+
+function toListingWithOwner(r: PrismaListingWithOwner): ListingWithOwner {
+  return {
+    ...toListing(r),
     owner: {
-      id: owner.id,
-      name: owner.name,
-      avatarUrl: owner.avatarUrl,
-      trustScore: owner.trustScore,
-      badges: owner.badges,
-      responseRate: owner.responseRate,
+      id: r.owner.id,
+      name: r.owner.name,
+      avatarUrl: r.owner.avatarUrl,
+      trustScore: r.owner.trustScore,
+      badges: r.owner.badges as ListingWithOwner['owner']['badges'],
+      responseRate: r.owner.responseRate,
     },
   }
 }
 
 export async function getListings(filters?: Partial<SearchFilters>): Promise<ListingWithOwner[]> {
-  let results = MOCK_LISTINGS.filter((l) => l.status === 'active')
+  // Build where clause
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: any = { status: 'active' }
 
-  if (filters?.category) {
-    results = results.filter((l) => l.category === filters.category)
+  if (filters?.category) where.category = filters.category
+  if (filters?.instantBookOnly) where.instantBook = true
+  if (filters?.condition) where.condition = filters.condition
+  if (filters?.minPrice || filters?.maxPrice) {
+    where.dailyRate = {}
+    if (filters.minPrice) where.dailyRate.gte = filters.minPrice
+    if (filters.maxPrice) where.dailyRate.lte = filters.maxPrice
   }
+  if (filters?.minRating) where.averageRating = { gte: filters.minRating }
   if (filters?.query) {
-    const q = filters.query.toLowerCase()
-    results = results.filter(
-      (l) =>
-        l.title.toLowerCase().includes(q) ||
-        l.description.toLowerCase().includes(q) ||
-        l.tags.some((t) => t.includes(q)) ||
-        l.brand?.toLowerCase().includes(q)
-    )
-  }
-  if (filters?.minPrice) {
-    results = results.filter((l) => l.pricing.dailyRate >= filters.minPrice!)
-  }
-  if (filters?.maxPrice) {
-    results = results.filter((l) => l.pricing.dailyRate <= filters.maxPrice!)
-  }
-  if (filters?.instantBookOnly) {
-    results = results.filter((l) => l.availability.instantBook)
-  }
-  if (filters?.minRating) {
-    results = results.filter((l) => l.stats.averageRating >= filters.minRating!)
-  }
-  if (filters?.condition) {
-    results = results.filter((l) => l.condition === filters.condition)
+    const q = filters.query
+    where.OR = [
+      { title: { contains: q, mode: 'insensitive' } },
+      { description: { contains: q, mode: 'insensitive' } },
+      { brand: { contains: q, mode: 'insensitive' } },
+      { tags: { has: q.toLowerCase() } },
+    ]
   }
 
-  // sort
+  // Build orderBy
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let orderBy: any = { createdAt: 'desc' }
   switch (filters?.sortBy) {
-    case 'price-asc':  results.sort((a, b) => a.pricing.dailyRate - b.pricing.dailyRate); break
-    case 'price-desc': results.sort((a, b) => b.pricing.dailyRate - a.pricing.dailyRate); break
-    case 'rating':     results.sort((a, b) => b.stats.averageRating - a.stats.averageRating); break
-    case 'newest':     results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); break
+    case 'price-asc':  orderBy = { dailyRate: 'asc' }; break
+    case 'price-desc': orderBy = { dailyRate: 'desc' }; break
+    case 'rating':     orderBy = { averageRating: 'desc' }; break
+    case 'newest':     orderBy = { createdAt: 'desc' }; break
   }
 
-  return results.map(attachOwner)
+  const rows = await db.listing.findMany({ where, orderBy, include: { owner: { select: ownerSelect } } })
+  return rows.map(toListingWithOwner)
 }
 
 export async function getListingById(id: string): Promise<ListingWithOwner | null> {
-  const listing = MOCK_LISTINGS.find((l) => l.id === id)
-  if (!listing) return null
-  return attachOwner(listing)
+  const row = await db.listing.findUnique({ where: { id }, include: { owner: { select: ownerSelect } } })
+  return row ? toListingWithOwner(row) : null
 }
 
 export async function getFeaturedListings(limit = 6): Promise<ListingWithOwner[]> {
-  return MOCK_LISTINGS
-    .filter((l) => l.status === 'active')
-    .sort((a, b) => b.stats.reviewCount - a.stats.reviewCount)
-    .slice(0, limit)
-    .map(attachOwner)
+  const rows = await db.listing.findMany({
+    where: { status: 'active' },
+    orderBy: { reviewCount: 'desc' },
+    take: limit,
+    include: { owner: { select: ownerSelect } },
+  })
+  return rows.map(toListingWithOwner)
 }
 
 export async function getListingsByOwner(ownerId: string): Promise<ListingWithOwner[]> {
-  return MOCK_LISTINGS.filter((l) => l.ownerId === ownerId).map(attachOwner)
+  const rows = await db.listing.findMany({
+    where: { ownerId },
+    orderBy: { createdAt: 'desc' },
+    include: { owner: { select: ownerSelect } },
+  })
+  return rows.map(toListingWithOwner)
 }
 
 export async function getSimilarListings(listing: Listing, limit = 4): Promise<ListingWithOwner[]> {
-  return MOCK_LISTINGS
-    .filter((l) => l.id !== listing.id && l.category === listing.category && l.status === 'active')
-    .slice(0, limit)
-    .map(attachOwner)
+  const rows = await db.listing.findMany({
+    where: { category: listing.category, status: 'active', id: { not: listing.id } },
+    take: limit,
+    include: { owner: { select: ownerSelect } },
+  })
+  return rows.map(toListingWithOwner)
 }
 
-export const CATEGORY_COUNTS: Record<ToolCategory, number> = MOCK_LISTINGS.reduce(
-  (acc, l) => {
-    if (l.status === 'active') acc[l.category] = (acc[l.category] ?? 0) + 1
-    return acc
-  },
-  {} as Record<ToolCategory, number>
-)
+export async function getCategoryCounts(): Promise<Partial<Record<ToolCategory, number>>> {
+  const groups = await db.listing.groupBy({
+    by: ['category'],
+    where: { status: 'active' },
+    _count: true,
+  })
+  return Object.fromEntries(groups.map((g) => [g.category as ToolCategory, g._count]))
+}
+
+// Kept for backward compatibility — callers that need category counts synchronously
+// should migrate to getCategoryCounts()
+export const CATEGORY_COUNTS: Partial<Record<ToolCategory, number>> = {}

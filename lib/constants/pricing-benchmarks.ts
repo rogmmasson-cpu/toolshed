@@ -19,8 +19,11 @@ export const PRICING_BENCHMARKS: Record<ToolCategory, PricingBenchmark> = {
   'electrical':   { category: 'electrical',   dailyRateMinPct: 0.008, dailyRateMaxPct: 0.014, depositPct: 0.15 },
   'moving':       { category: 'moving',       dailyRateMinPct: 0.015, dailyRateMaxPct: 0.025, depositPct: 0.12 },
   'outdoor':      { category: 'outdoor',      dailyRateMinPct: 0.008, dailyRateMaxPct: 0.015, depositPct: 0.12 },
-  'kitchen':      { category: 'kitchen',      dailyRateMinPct: 0.004, dailyRateMaxPct: 0.008, depositPct: 0.10 },
-  'other':        { category: 'other',        dailyRateMinPct: 0.007, dailyRateMaxPct: 0.013, depositPct: 0.13 },
+  'kitchen':        { category: 'kitchen',        dailyRateMinPct: 0.004, dailyRateMaxPct: 0.008, depositPct: 0.10 },
+  'party-rentals':  { category: 'party-rentals',  dailyRateMinPct: 0.012, dailyRateMaxPct: 0.022, depositPct: 0.20 },
+  'kids':           { category: 'kids',           dailyRateMinPct: 0.008, dailyRateMaxPct: 0.015, depositPct: 0.15 },
+  'trailers':       { category: 'trailers',       dailyRateMinPct: 0.015, dailyRateMaxPct: 0.030, depositPct: 0.25 },
+  'other':          { category: 'other',          dailyRateMinPct: 0.007, dailyRateMaxPct: 0.013, depositPct: 0.13 },
 }
 
 export const PLATFORM_FEE_PCT = 0.10       // 10% of subtotal

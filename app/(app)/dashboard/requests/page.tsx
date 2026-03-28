@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { ArrowLeft, Clock, CheckCircle2, XCircle } from 'lucide-react'
+import { ArrowLeft, Clock } from 'lucide-react'
 import { getBookingsByOwner } from '@/lib/mock-db/bookings'
 import { getListingById } from '@/lib/mock-db/listings'
 import { getUserById } from '@/lib/mock-db/users'
-import { formatCents, formatDateRange, formatDuration, timeAgo } from '@/lib/utils/formatting'
+import { formatCents, formatDateRange } from '@/lib/utils/formatting'
 import Avatar from '@/components/ui/Avatar'
 import Badge from '@/components/ui/Badge'
+import RequestCard from '@/components/dashboard/RequestCard'
 
 export default async function RequestsPage() {
   const bookings = await getBookingsByOwner('usr_current')
@@ -48,42 +49,7 @@ export default async function RequestsPage() {
             {pending.map(b => {
               const { listing, renter } = byId[b.id]
               return (
-                <div key={b.id} className="card p-5 border-l-4 border-yellow-400">
-                  <div className="flex items-start gap-4">
-                    {listing?.photos[0] && (
-                      <img src={listing.photos[0]} alt="" className="w-20 h-16 rounded-xl object-cover flex-shrink-0"/>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm">{listing?.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {formatDateRange(b.dates.startDate, b.dates.endDate)} · {formatDuration(b.dates.totalDays)}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Payout: <span className="font-semibold text-forest-700">{formatCents(b.pricing.subtotal * 0.9)}</span>
-                      </p>
-
-                      {renter && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <Avatar src={renter.avatarUrl} name={renter.name} size="xs"/>
-                          <span className="text-xs text-gray-700 font-medium">{renter.name}</span>
-                          <span className="text-xs text-gray-400">· Trust {renter.trustScore}</span>
-                          <span className="text-xs text-gray-400">· {timeAgo(b.createdAt)}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <button className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-forest-500 hover:bg-forest-600 text-white text-sm font-semibold rounded-xl transition-colors">
-                      <CheckCircle2 size={15}/>Approve
-                    </button>
-                    <button className="flex items-center justify-center gap-1.5 px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-semibold rounded-xl transition-colors">
-                      <XCircle size={15}/>Decline
-                    </button>
-                    <Link href="/messages" className="flex items-center justify-center gap-1.5 px-4 py-2 border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-semibold rounded-xl transition-colors">
-                      Message
-                    </Link>
-                  </div>
-                </div>
+                <RequestCard key={b.id} booking={b} listing={listing ?? null} renter={renter ?? null} />
               )
             })}
           </div>
