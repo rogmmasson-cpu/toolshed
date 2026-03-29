@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { SearchFilters, ToolCategory, ToolCondition, SortOption } from '@/lib/types'
 import { getListings } from '@/lib/mock-db/listings'
+import { zipToLatLng } from '@/lib/utils/geocode'
 import ListingCard from '@/components/listings/ListingCard'
 import ListingFilters from '@/components/listings/ListingFilters'
 import MobileFilterDrawer from '@/components/listings/MobileFilterDrawer'
@@ -40,6 +41,10 @@ async function ListingGrid({ filters }: { filters: Partial<SearchFilters> }) {
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const params = await searchParams
+
+  // Geocode ZIP → lat/lng for distance sorting
+  const coords = params.zip ? await zipToLatLng(params.zip) : null
+
   const filters: Partial<SearchFilters> = {
     query: params.q ?? '',
     category: (params.category as ToolCategory) ?? null,
@@ -48,6 +53,8 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     sortBy: (params.sort as SortOption) ?? 'relevance',
     instantBookOnly: params.instant === '1',
     condition: (params.condition as ToolCondition) ?? null,
+    lat: coords?.lat ?? null,
+    lng: coords?.lng ?? null,
   }
 
   const activeFiltersCount = [filters.category, filters.minPrice, filters.maxPrice, filters.instantBookOnly, filters.condition].filter(Boolean).length
@@ -87,7 +94,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
             </span>
           )}
           <Suspense>
-            <MobileFilterDrawer activeFiltersCount={activeFiltersCount} />
+            <MobileFilterDrawer activeFiltersCount={activeFiltersCount} hasZip={!!params.zip} />
           </Suspense>
         </div>
       </div>
@@ -96,7 +103,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         {/* Filters sidebar */}
         <div className="w-56 flex-shrink-0 hidden lg:block">
           <Suspense>
-            <ListingFilters />
+            <ListingFilters hasZip={!!params.zip} />
           </Suspense>
         </div>
 

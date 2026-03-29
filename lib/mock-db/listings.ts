@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { Listing, ListingWithOwner, SearchFilters, ToolCategory, ToolCondition } from '@/lib/types'
 import type { Listing as PrismaListing, User as PrismaUser } from '@prisma/client'
+import { haversineDistanceMiles } from '@/lib/utils/geocode'
 
 type PrismaListingWithOwner = PrismaListing & {
   owner: Pick<PrismaUser, 'id' | 'name' | 'avatarUrl' | 'trustScore' | 'badges' | 'responseRate'>
@@ -111,15 +112,31 @@ export async function getListings(filters?: Partial<SearchFilters>): Promise<Lis
   // Build orderBy
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let orderBy: any = { createdAt: 'desc' }
+  const sortByDistance = filters?.sortBy === 'distance'
   switch (filters?.sortBy) {
     case 'price-asc':  orderBy = { dailyRate: 'asc' }; break
     case 'price-desc': orderBy = { dailyRate: 'desc' }; break
     case 'rating':     orderBy = { averageRating: 'desc' }; break
     case 'newest':     orderBy = { createdAt: 'desc' }; break
+    // distance is sorted in-memory after fetch
   }
 
   const rows = await db.listing.findMany({ where, orderBy, include: { owner: { select: ownerSelect } } })
-  return rows.map(toListingWithOwner)
+  const listings = rows.map(toListingWithOwner)
+
+  // Distance sort — attach distanceMiles and re-sort
+  if (sortByDistance && filters?.lat != null && filters?.lng != null) {
+    const userLat = filters.lat
+    const userLng = filters.lng
+    for (const l of listings) {
+      l.distanceMiles = Math.round(
+        haversineDistanceMiles(userLat, userLng, l.location.lat, l.location.lng) * 10
+      ) / 10
+    }
+    listings.sort((a, b) => (a.distanceMiles ?? Infinity) - (b.distanceMiles ?? Infinity))
+  }
+
+  return listings
 }
 
 export async function getListingById(id: string): Promise<ListingWithOwner | null> {

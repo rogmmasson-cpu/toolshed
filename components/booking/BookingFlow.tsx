@@ -1,11 +1,11 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Shield, ChevronRight, Check, CreditCard } from 'lucide-react'
+import { ChevronRight, Check, CreditCard } from 'lucide-react'
 import { calcDaysBetween } from '@/lib/utils/availability'
 import { ListingWithOwner } from '@/lib/types'
 import { formatCents } from '@/lib/utils/formatting'
-import { calcBookingPricing, INSURANCE_DAILY_CENTS } from '@/lib/utils/pricing'
+import { calcBookingPricing } from '@/lib/utils/pricing'
 import { createBooking } from '@/lib/actions/bookings'
 import BookingSummary from '@/components/booking/BookingSummary'
 import WaiverText from '@/components/booking/WaiverText'
@@ -14,10 +14,9 @@ import { cn } from '@/lib/utils/cn'
 
 const STEPS = [
   { id: 1, label: 'Dates' },
-  { id: 2, label: 'Protection' },
-  { id: 3, label: 'Waiver' },
-  { id: 4, label: 'Payment' },
-  { id: 5, label: 'Confirm' },
+  { id: 2, label: 'Waiver' },
+  { id: 3, label: 'Payment' },
+  { id: 4, label: 'Confirm' },
 ]
 
 interface Props {
@@ -31,7 +30,6 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
   const days = startDate && endDate ? Math.max(1, calcDaysBetween(startDate, endDate)) : 1
 
   const [step, setStep] = useState(1)
-  const [insuranceEnrolled, setInsuranceEnrolled] = useState(false)
   const [waiverSigned, setWaiverSigned] = useState(false)
   const [signature, setSignature] = useState('')
   const [agreed, setAgreed] = useState(false)
@@ -42,7 +40,6 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
     listing.pricing.dailyRate,
     days,
     listing.pricing.depositAmount,
-    insuranceEnrolled,
     listing.pricing.weekendRate,
     startDate,
   )
@@ -60,7 +57,7 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
         dailyRate: listing.pricing.dailyRate,
         depositAmount: listing.pricing.depositAmount,
         weekendRate: listing.pricing.weekendRate,
-        insuranceEnrolled,
+        insuranceEnrolled: false,
         instantBook: listing.availability.instantBook,
         waiverSigned,
         waiverSignature: signature,
@@ -123,75 +120,23 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
                   <p className="font-bold text-gray-900">{endDate || '—'}</p>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-xl p-4">
+              <div className="bg-gray-50 rounded-xl p-4 space-y-1">
                 <p className="text-sm text-gray-600">Duration: <span className="font-semibold text-gray-900">{days} day{days !== 1 ? 's' : ''}</span></p>
-                <p className="text-sm text-gray-600 mt-1">Total (before deposit): <span className="font-semibold text-gray-900">{formatCents(pricing.totalCharge)}</span></p>
+                <p className="text-sm text-gray-600">Rental total: <span className="font-semibold text-gray-900">{formatCents(pricing.totalCharge)}</span></p>
+                <p className="text-sm text-gray-600">Refundable deposit: <span className="font-semibold text-gray-900">+ {formatCents(pricing.depositAmount)}</span></p>
+                <p className="text-sm font-semibold text-gray-900 pt-1 border-t border-gray-200">Due at booking: {formatCents(pricing.totalWithDeposit)}</p>
               </div>
               <p className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-3">
                 📍 You&apos;ll coordinate exact pickup location with {listing.owner.name} after booking is confirmed.
               </p>
               <Button className="w-full" onClick={() => setStep(2)}>
-                Continue to Protection →
+                Continue to Waiver →
               </Button>
             </div>
           )}
 
-          {/* Step 2: Protection */}
+          {/* Step 2: Waiver */}
           {step === 2 && (
-            <div className="card p-6 space-y-5">
-              <h2 className="text-lg font-semibold text-gray-900">Add Protection Plan</h2>
-              <p className="text-sm text-gray-500">ToolShed Protection covers accidental damage up to the item&apos;s retail value, after a $50 deductible.</p>
-
-              <div
-                className={cn('border-2 rounded-2xl p-5 cursor-pointer transition-all', insuranceEnrolled ? 'border-forest-400 bg-forest-50' : 'border-gray-200 hover:border-gray-300')}
-                onClick={() => setInsuranceEnrolled(!insuranceEnrolled)}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center', insuranceEnrolled ? 'bg-forest-500 text-white' : 'bg-gray-100 text-gray-400')}>
-                      <Shield size={20} />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">ToolShed Protection</p>
-                      <p className="text-sm text-gray-500">{formatCents(INSURANCE_DAILY_CENTS)}/day · {formatCents(INSURANCE_DAILY_CENTS * days)} total</p>
-                    </div>
-                  </div>
-                  <div className={cn('w-5 h-5 rounded-full border-2 flex items-center justify-center', insuranceEnrolled ? 'border-forest-500 bg-forest-500' : 'border-gray-300')}>
-                    {insuranceEnrolled && <Check size={10} className="text-white" />}
-                  </div>
-                </div>
-                <ul className="mt-3 space-y-1 text-xs text-gray-500">
-                  <li>✓ Covers accidental damage up to retail value</li>
-                  <li>✓ $50 deductible (vs. full deposit at risk)</li>
-                  <li>✓ Claims processed within 48 hours</li>
-                  <li>✗ Does not cover personal injury or theft</li>
-                </ul>
-              </div>
-
-              <div
-                className={cn('border-2 rounded-2xl p-5 cursor-pointer transition-all', !insuranceEnrolled ? 'border-gray-400 bg-gray-50' : 'border-gray-200 hover:border-gray-300')}
-                onClick={() => setInsuranceEnrolled(false)}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-gray-900">No Protection</p>
-                    <p className="text-sm text-gray-500">Your {formatCents(listing.pricing.depositAmount)} deposit covers any damage claim</p>
-                  </div>
-                  <div className={cn('w-5 h-5 rounded-full border-2 flex items-center justify-center', !insuranceEnrolled ? 'border-gray-500 bg-gray-500' : 'border-gray-300')}>
-                    {!insuranceEnrolled && <Check size={10} className="text-white" />}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button variant="secondary" onClick={() => setStep(1)}>← Back</Button>
-                <Button className="flex-1" onClick={() => setStep(3)}>Continue to Waiver →</Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Waiver */}
-          {step === 3 && (
             <div className="card p-6 space-y-5">
               <h2 className="text-lg font-semibold text-gray-900">Liability Waiver</h2>
               <div className="bg-gray-50 rounded-xl p-5 h-80 overflow-y-auto border border-gray-200">
@@ -219,11 +164,11 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
                 </span>
               </label>
               <div className="flex gap-3">
-                <Button variant="secondary" onClick={() => setStep(2)}>← Back</Button>
+                <Button variant="secondary" onClick={() => setStep(1)}>← Back</Button>
                 <Button
                   className="flex-1"
                   disabled={!signature.trim() || !agreed}
-                  onClick={() => { setWaiverSigned(true); setStep(4) }}
+                  onClick={() => { setWaiverSigned(true); setStep(3) }}
                 >
                   Sign & Continue →
                 </Button>
@@ -231,8 +176,8 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
             </div>
           )}
 
-          {/* Step 4: Payment */}
-          {step === 4 && (
+          {/* Step 3: Payment */}
+          {step === 3 && (
             <div className="card p-6 space-y-5">
               <h2 className="text-lg font-semibold text-gray-900">Payment Details</h2>
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700">
@@ -263,24 +208,24 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
                 </div>
               </div>
               <div className="flex gap-3">
-                <Button variant="secondary" onClick={() => setStep(3)}>← Back</Button>
-                <Button className="flex-1" onClick={() => setStep(5)}>Review & Confirm →</Button>
+                <Button variant="secondary" onClick={() => setStep(2)}>← Back</Button>
+                <Button className="flex-1" onClick={() => setStep(4)}>Review & Confirm →</Button>
               </div>
             </div>
           )}
 
-          {/* Step 5: Confirm */}
-          {step === 5 && (
+          {/* Step 4: Confirm */}
+          {step === 4 && (
             <div className="card p-6 space-y-5">
               <h2 className="text-lg font-semibold text-gray-900">Review & Confirm</h2>
               <div className="space-y-3 text-sm">
                 {[
                   { label: 'Item', value: listing.title },
                   { label: 'Dates', value: `${startDate} → ${endDate} (${days} day${days !== 1 ? 's' : ''})` },
-                  { label: 'Protection', value: insuranceEnrolled ? 'ToolShed Protection enrolled' : 'No protection plan' },
                   { label: 'Waiver', value: waiverSigned ? `Signed as "${signature}"` : '⚠ Not yet signed' },
-                  { label: 'Total charge', value: formatCents(pricing.totalCharge) },
-                  { label: 'Refundable deposit', value: formatCents(pricing.depositAmount) },
+                  { label: 'Rental total', value: formatCents(pricing.totalCharge) },
+                  { label: 'Refundable deposit', value: `+ ${formatCents(pricing.depositAmount)}` },
+                  { label: 'Due at booking', value: formatCents(pricing.totalWithDeposit) },
                 ].map((row) => (
                   <div key={row.label} className="flex justify-between py-2 border-b border-gray-100 last:border-0">
                     <span className="text-gray-500">{row.label}</span>
@@ -289,11 +234,11 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
                 ))}
               </div>
               <p className="text-xs text-gray-500">
-                By confirming, {formatCents(pricing.totalWithDeposit)} will be authorized on your card. The deposit is refunded automatically after check-out.
+                {formatCents(pricing.totalWithDeposit)} will be authorized on your card — {formatCents(pricing.totalCharge)} rental + {formatCents(pricing.depositAmount)} refundable deposit. The deposit is returned automatically after check-out.
               </p>
               {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
               <div className="flex gap-3">
-                <Button variant="secondary" onClick={() => setStep(4)}>← Back</Button>
+                <Button variant="secondary" onClick={() => setStep(3)}>← Back</Button>
                 <Button className="flex-1" loading={submitting} onClick={handleConfirm}>
                   {listing.availability.instantBook ? '⚡ Confirm & Pay' : 'Send Request'}
                 </Button>
@@ -307,7 +252,6 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
           startDate={startDate}
           endDate={endDate}
           days={days}
-          insuranceEnrolled={insuranceEnrolled}
           waiverSigned={waiverSigned}
         />
       </div>

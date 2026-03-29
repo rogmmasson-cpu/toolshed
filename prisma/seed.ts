@@ -17,6 +17,81 @@ const MOCK_USERS = [
   { id: 'usr_5', name: 'Tom Brennan', email: 'tom@example.com', avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face', bio: 'General contractor. Tools are my trade — happy to share.', locationCity: 'Marion', locationState: 'MA', locationNeighborhood: 'Marion Village', locationLat: 41.698, locationLng: -70.762, trustScore: 85, badges: ['email', 'phone', 'id'], responseRate: 0.91, responseTimeHours: 6, totalListings: 6, totalRentals: 5, totalLends: 28 },
 ]
 
+const MOCK_REVIEWS = [
+  {
+    id: 'rev_1',
+    bookingId: 'bkg_1',
+    authorId: 'usr_4',
+    targetId: 'usr_3',
+    targetType: 'owner',
+    overallRating: 5, accuracyRating: 5, communicationRating: 5, conditionRating: null, reliabilityRating: null,
+    content: 'David is an incredible host! The drill was spotless, fully charged, and exactly as described. He even gave me a quick tutorial on the settings. Will definitely rent from him again.',
+    response: 'Thanks so much! Good luck with the project — come back anytime.',
+    isVisible: true,
+    listingId: null,
+  },
+  {
+    id: 'rev_2',
+    bookingId: 'bkg_1',
+    authorId: 'usr_3',
+    targetId: 'usr_4',
+    targetType: 'renter',
+    overallRating: 5, accuracyRating: null, communicationRating: 5, conditionRating: 5, reliabilityRating: 5,
+    content: 'Priya was a model renter — returned everything on time and cleaner than she received it. Would welcome her back in a heartbeat.',
+    response: null,
+    isVisible: true,
+    listingId: null,
+  },
+  {
+    id: 'rev_3',
+    bookingId: 'bkg_2',
+    authorId: 'usr_4',
+    targetId: 'usr_3',
+    targetType: 'owner',
+    overallRating: 5, accuracyRating: 5, communicationRating: 5, conditionRating: null, reliabilityRating: null,
+    content: "Couldn't be happier! The pressure washer cleaned my driveway in two hours. David was quick to respond and made the handoff super easy.",
+    response: 'Glad to hear it worked well! The driveway jobs are always satisfying.',
+    isVisible: true,
+    listingId: null,
+  },
+  {
+    id: 'rev_4',
+    bookingId: 'bkg_3',
+    authorId: 'usr_4',
+    targetId: 'usr_2',
+    targetType: 'owner',
+    overallRating: 4, accuracyRating: 4, communicationRating: 5, conditionRating: null, reliabilityRating: null,
+    content: "Sarah was super helpful and the mower worked great. Only minor note: one battery was at about 60% instead of fully charged, but still got the job done no problem.",
+    response: "Thanks for the feedback — I've upgraded to a larger battery since then!",
+    isVisible: true,
+    listingId: null,
+  },
+  {
+    id: 'rev_5',
+    bookingId: 'bkg_4',
+    authorId: 'usr_1',
+    targetId: 'usr_5',
+    targetType: 'owner',
+    overallRating: 5, accuracyRating: 5, communicationRating: 4, conditionRating: null, reliabilityRating: null,
+    content: 'The moving kit saved us hundreds compared to hiring help. Everything was in great shape and the blankets kept our furniture scratch-free.',
+    response: null,
+    isVisible: true,
+    listingId: null,
+  },
+  {
+    id: 'rev_6',
+    bookingId: 'bkg_5',
+    authorId: 'usr_1',
+    targetId: 'lst_9',
+    targetType: 'tool',
+    overallRating: 5, accuracyRating: 5, communicationRating: null, conditionRating: 5, reliabilityRating: null,
+    content: 'The KitchenAid was in immaculate condition. Made holiday cookies for 4 batches without breaking a sweat. Highly recommend this listing.',
+    response: null,
+    isVisible: true,
+    listingId: 'lst_9',
+  },
+]
+
 const MOCK_CONVERSATIONS = [
   {
     id: 'conv_1',
@@ -165,6 +240,45 @@ async function main() {
     })
   }
   console.log(`Seeded ${MOCK_LISTINGS.length} listings`)
+
+  // Upsert reviews
+  for (const r of MOCK_REVIEWS) {
+    await prisma.review.upsert({
+      where: { id: r.id },
+      update: {
+        bookingId: r.bookingId,
+        authorId: r.authorId,
+        targetId: r.targetId,
+        targetType: r.targetType,
+        listingId: r.listingId,
+        overallRating: r.overallRating,
+        accuracyRating: r.accuracyRating,
+        communicationRating: r.communicationRating,
+        conditionRating: r.conditionRating,
+        reliabilityRating: r.reliabilityRating,
+        content: r.content,
+        response: r.response,
+        isVisible: r.isVisible,
+      },
+      create: {
+        id: r.id,
+        bookingId: r.bookingId,
+        authorId: r.authorId,
+        targetId: r.targetId,
+        targetType: r.targetType,
+        listingId: r.listingId,
+        overallRating: r.overallRating,
+        accuracyRating: r.accuracyRating,
+        communicationRating: r.communicationRating,
+        conditionRating: r.conditionRating,
+        reliabilityRating: r.reliabilityRating,
+        content: r.content,
+        response: r.response,
+        isVisible: r.isVisible,
+      },
+    })
+  }
+  console.log(`Seeded ${MOCK_REVIEWS.length} reviews`)
 
   // Upsert conversations
   for (const c of MOCK_CONVERSATIONS) {

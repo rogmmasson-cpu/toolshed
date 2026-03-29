@@ -156,6 +156,7 @@ export interface Listing {
   publishedAt: string | null
   createdAt: string
   updatedAt: string
+  distanceMiles?: number
 }
 
 export interface Booking {

@@ -48,7 +48,6 @@ export async function createBooking(input: CreateBookingInput): Promise<string> 
     input.dailyRate,
     input.totalDays,
     input.depositAmount,
-    input.insuranceEnrolled,
     input.weekendRate,
     input.startDate,
   )
@@ -68,7 +67,7 @@ export async function createBooking(input: CreateBookingInput): Promise<string> 
       dailyRate: pricing.dailyRate,
       subtotal: pricing.subtotal,
       platformFee: pricing.platformFee,
-      insuranceFee: pricing.insuranceFee,
+      insuranceFee: 0,
       depositAmount: pricing.depositAmount,
       totalCharge: pricing.totalCharge,
       totalWithDeposit: pricing.totalWithDeposit,

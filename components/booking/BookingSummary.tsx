@@ -1,9 +1,8 @@
 'use client'
-import { Shield, Zap } from 'lucide-react'
+import { Shield } from 'lucide-react'
 import { ListingWithOwner } from '@/lib/types'
 import { formatCents, formatLocation } from '@/lib/utils/formatting'
 import { calcBookingPricing } from '@/lib/utils/pricing'
-import { INSURANCE_DAILY_CENTS } from '@/lib/utils/pricing'
 import Avatar from '@/components/ui/Avatar'
 
 interface BookingSummaryProps {
@@ -11,12 +10,11 @@ interface BookingSummaryProps {
   startDate: string
   endDate: string
   days: number
-  insuranceEnrolled: boolean
   waiverSigned: boolean
 }
 
-export default function BookingSummary({ listing, startDate, endDate, days, insuranceEnrolled, waiverSigned }: BookingSummaryProps) {
-  const pricing = calcBookingPricing(listing.pricing.dailyRate, days, listing.pricing.depositAmount, insuranceEnrolled, listing.pricing.weekendRate, startDate)
+export default function BookingSummary({ listing, startDate, endDate, days, waiverSigned }: BookingSummaryProps) {
+  const pricing = calcBookingPricing(listing.pricing.dailyRate, days, listing.pricing.depositAmount, listing.pricing.weekendRate, startDate)
 
   return (
     <div className="card p-5 sticky top-24">
@@ -51,40 +49,24 @@ export default function BookingSummary({ listing, startDate, endDate, days, insu
           <span className="text-gray-600">{formatCents(listing.pricing.dailyRate)} × {days} day{days !== 1 ? 's' : ''}</span>
           <span className="font-medium">{formatCents(pricing.subtotal)}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Service fee (10%)</span>
-          <span className="font-medium">{formatCents(pricing.platformFee)}</span>
-        </div>
-        {insuranceEnrolled && (
-          <div className="flex justify-between text-forest-700">
-            <span>🛡️ Protection plan × {days}d</span>
-            <span className="font-medium">{formatCents(pricing.insuranceFee)}</span>
-          </div>
-        )}
         <div className="border-t border-gray-200 pt-2.5 flex justify-between font-bold text-gray-900">
-          <span>Total charge</span>
+          <span>Rental total</span>
           <span>{formatCents(pricing.totalCharge)}</span>
         </div>
         <div className="flex justify-between text-xs text-gray-500">
           <span className="flex items-center gap-1"><Shield size={12} className="text-forest-500" />Refundable deposit</span>
           <span>+ {formatCents(pricing.depositAmount)}</span>
         </div>
-        <div className="flex justify-between text-sm font-semibold text-gray-500">
-          <span>Total (incl. deposit)</span>
+        <div className="flex justify-between text-sm font-semibold text-gray-900">
+          <span>Due at booking</span>
           <span>{formatCents(pricing.totalWithDeposit)}</span>
         </div>
       </div>
 
-      {/* Status chips */}
-      <div className="space-y-2">
-        <div className={`flex items-center gap-2 text-xs rounded-lg px-3 py-2 ${insuranceEnrolled ? 'bg-forest-50 text-forest-700' : 'bg-gray-50 text-gray-500'}`}>
-          <Zap size={13} />
-          {insuranceEnrolled ? 'Protection plan enrolled' : 'No protection plan'}
-        </div>
-        <div className={`flex items-center gap-2 text-xs rounded-lg px-3 py-2 ${waiverSigned ? 'bg-forest-50 text-forest-700' : 'bg-gray-50 text-gray-500'}`}>
-          <Shield size={13} />
-          {waiverSigned ? 'Liability waiver signed' : 'Waiver not yet signed'}
-        </div>
+      {/* Status chip */}
+      <div className={`flex items-center gap-2 text-xs rounded-lg px-3 py-2 ${waiverSigned ? 'bg-forest-50 text-forest-700' : 'bg-gray-50 text-gray-500'}`}>
+        <Shield size={13} />
+        {waiverSigned ? 'Liability waiver signed' : 'Waiver not yet signed'}
       </div>
     </div>
   )

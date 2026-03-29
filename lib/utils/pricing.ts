@@ -4,7 +4,6 @@ import {
   PLATFORM_FEE_PCT,
   WEEKLY_DISCOUNT_PCT,
   MONTHLY_DISCOUNT_PCT,
-  INSURANCE_DAILY_RATE,
 } from '@/lib/constants/pricing-benchmarks'
 
 export function getSmartPricingSuggestion(
@@ -38,10 +37,14 @@ export function getSmartPricingSuggestion(
 export interface BookingPricing {
   dailyRate: number
   totalDays: number
+  /** Total the lessee pays — the all-in rental cost, no fee added on top */
   subtotal: number
+  /** ToolShed's cut — deducted from the lessor's payout, invisible to the lessee */
   platformFee: number
-  insuranceFee: number
+  /** What the lessor receives after the platform fee is deducted */
+  lessorPayout: number
   depositAmount: number
+  /** Equals subtotal — kept for DB compat (no fee surcharge on the renter) */
   totalCharge: number
   totalWithDeposit: number
 }
@@ -50,7 +53,6 @@ export function calcBookingPricing(
   dailyRate: number,
   totalDays: number,
   depositAmount: number,
-  insuranceEnrolled: boolean,
   weekendRate?: number | null,
   startDate?: string | null
 ): BookingPricing {
@@ -67,18 +69,17 @@ export function calcBookingPricing(
   } else {
     subtotal = dailyRate * totalDays
   }
+  // Fee is taken from the lessor — renter pays only the rental amount
   const platformFee = Math.round(subtotal * PLATFORM_FEE_PCT)
-  const insuranceFee = insuranceEnrolled ? INSURANCE_DAILY_RATE * totalDays : 0
-  const totalCharge = subtotal + platformFee + insuranceFee
   return {
     dailyRate,
     totalDays,
     subtotal,
     platformFee,
-    insuranceFee,
+    lessorPayout: subtotal - platformFee,
     depositAmount,
-    totalCharge,
-    totalWithDeposit: totalCharge + depositAmount,
+    totalCharge: subtotal,
+    totalWithDeposit: subtotal + depositAmount,
   }
 }
 
@@ -98,5 +99,3 @@ export function calcEffectiveRate(
   }
   return dailyRate * days
 }
-
-export const INSURANCE_DAILY_CENTS = INSURANCE_DAILY_RATE

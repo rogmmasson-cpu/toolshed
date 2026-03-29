@@ -47,7 +47,7 @@ export async function createReview(input: CreateReviewInput): Promise<void> {
       bookingId: input.bookingId,
       authorId,
       targetId: booking.ownerId,
-      targetType: 'user',
+      targetType: 'owner',
       listingId: booking.listingId,
       overallRating: input.overallRating,
       accuracyRating: input.accuracyRating || null,

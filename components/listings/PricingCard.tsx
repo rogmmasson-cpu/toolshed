@@ -5,7 +5,7 @@ import { CalendarDays, Shield, Zap, MessageSquare } from 'lucide-react'
 import { ListingWithOwner } from '@/lib/types'
 import { formatCents, formatDate } from '@/lib/utils/formatting'
 import { calcBookingPricing } from '@/lib/utils/pricing'
-import { PLATFORM_FEE_PCT, INSURANCE_DAILY_RATE } from '@/lib/constants/pricing-benchmarks'
+import { PLATFORM_FEE_PCT } from '@/lib/constants/pricing-benchmarks'
 import Button from '@/components/ui/Button'
 import StarRating from '@/components/ui/StarRating'
 import Avatar from '@/components/ui/Avatar'
@@ -18,7 +18,7 @@ export default function PricingCard({ listing }: { listing: ListingWithOwner }) 
 
   const days = startDate && endDate ? Math.max(1, calcDaysBetween(startDate, endDate)) : 0
   const pricing = days > 0
-    ? calcBookingPricing(listing.pricing.dailyRate, days, listing.pricing.depositAmount, false, listing.pricing.weekendRate, startDate)
+    ? calcBookingPricing(listing.pricing.dailyRate, days, listing.pricing.depositAmount, listing.pricing.weekendRate, startDate)
     : null
 
   return (
@@ -85,19 +85,15 @@ export default function PricingCard({ listing }: { listing: ListingWithOwner }) 
                 ? `${days} day${days > 1 ? 's' : ''} (mixed rates)`
                 : `${formatCents(listing.pricing.dailyRate)} × ${days} day${days > 1 ? 's' : ''}`}
             </span>
-            <span className="font-medium">{formatCents(pricing.subtotal)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">ToolShed fee (10%)</span>
-            <span className="font-medium">{formatCents(pricing.platformFee)}</span>
-          </div>
-          <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold">
-            <span>Total</span>
-            <span>{formatCents(pricing.totalCharge)}</span>
+            <span className="font-bold text-gray-900">{formatCents(pricing.totalCharge)}</span>
           </div>
           <div className="flex justify-between text-xs text-gray-500">
             <span>Refundable deposit</span>
             <span>+ {formatCents(listing.pricing.depositAmount)}</span>
+          </div>
+          <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold text-gray-900">
+            <span>Due at booking</span>
+            <span>{formatCents(pricing.totalWithDeposit)}</span>
           </div>
         </div>
       )}

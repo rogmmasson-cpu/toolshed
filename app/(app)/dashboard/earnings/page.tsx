@@ -19,7 +19,7 @@ export default async function EarningsPage() {
   // Use David's bookings (more data) to illustrate the earnings page
   const bookings = await getBookingsByOwner('usr_3')
   const completed = bookings.filter(b => b.status === 'completed')
-  const totalGross = completed.reduce((s, b) => s + b.pricing.subtotal, 0)
+  const totalGross = completed.reduce((s, b) => s + b.pricing.totalCharge, 0)
   const totalFees  = completed.reduce((s, b) => s + b.pricing.platformFee, 0)
   const totalNet   = totalGross - totalFees
 
@@ -32,9 +32,9 @@ export default async function EarningsPage() {
     startDate: b.dates.startDate,
     endDate: b.dates.endDate,
     days: b.dates.totalDays,
-    grossCents: b.pricing.subtotal,
+    grossCents: b.pricing.totalCharge,
     feeCents: b.pricing.platformFee,
-    netCents: b.pricing.subtotal - b.pricing.platformFee,
+    netCents: b.pricing.totalCharge - b.pricing.platformFee,
   }))
 
   const max = Math.max(...MOCK_MONTHLY.map(m => m.amount))
@@ -54,9 +54,9 @@ export default async function EarningsPage() {
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         {[
-          { label: 'Gross Revenue', value: formatCents(totalGross), icon: <DollarSign size={18}/>, color: 'text-forest-600 bg-forest-50' },
-          { label: 'Platform Fees', value: formatCents(totalFees),  icon: <TrendingUp size={18}/>, color: 'text-yellow-600 bg-yellow-50' },
-          { label: 'Net Payout',    value: formatCents(totalNet),   icon: <DollarSign size={18}/>, color: 'text-brand-600 bg-brand-50' },
+          { label: 'Rental Revenue', value: formatCents(totalGross), icon: <DollarSign size={18}/>, color: 'text-forest-600 bg-forest-50' },
+          { label: 'ToolShed Fee (10%)', value: `− ${formatCents(totalFees)}`,  icon: <TrendingUp size={18}/>, color: 'text-yellow-600 bg-yellow-50' },
+          { label: 'Your Payout',    value: formatCents(totalNet),   icon: <DollarSign size={18}/>, color: 'text-brand-600 bg-brand-50' },
         ].map(s => (
           <div key={s.label} className="card p-4">
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${s.color}`}>{s.icon}</div>
@@ -104,8 +104,8 @@ export default async function EarningsPage() {
                   <p className="text-xs text-gray-500">{formatDateRange(b.dates.startDate, b.dates.endDate)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-forest-700">+ {formatCents(b.pricing.subtotal * 0.9)}</p>
-                  <p className="text-xs text-gray-400">after 10% fee</p>
+                  <p className="text-sm font-bold text-forest-700">+ {formatCents(b.pricing.totalCharge - b.pricing.platformFee)}</p>
+                  <p className="text-xs text-gray-400">after 10% ToolShed fee</p>
                 </div>
               </div>
             ))}

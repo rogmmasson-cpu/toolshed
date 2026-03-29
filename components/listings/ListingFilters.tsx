@@ -27,7 +27,7 @@ const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest' },
 ]
 
-export default function ListingFilters({ onApply }: { onApply?: () => void } = {}) {
+export default function ListingFilters({ onApply, hasZip }: { onApply?: () => void; hasZip?: boolean } = {}) {
   const router = useRouter()
   const params = useSearchParams()
 
@@ -62,6 +62,7 @@ export default function ListingFilters({ onApply }: { onApply?: () => void } = {
           className="input-base text-sm"
         >
           {SORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {hasZip && <option value="distance">📍 Nearest First</option>}
         </select>
       </div>
 

@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils/cn'
 
 interface Props {
   activeFiltersCount: number
+  hasZip?: boolean
 }
 
-export default function MobileFilterDrawer({ activeFiltersCount }: Props) {
+export default function MobileFilterDrawer({ activeFiltersCount, hasZip }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -49,7 +50,7 @@ export default function MobileFilterDrawer({ activeFiltersCount }: Props) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          <ListingFilters onApply={() => setOpen(false)} />
+          <ListingFilters onApply={() => setOpen(false)} hasZip={hasZip} />
         </div>
         <div className="px-5 py-4 border-t border-gray-100">
           <button

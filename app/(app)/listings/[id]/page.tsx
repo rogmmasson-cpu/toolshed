@@ -175,7 +175,7 @@ export default async function ListingDetailPage({ params }: Props) {
             </div>
             <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
               <Package size={12} />
-              {formatCents(listing.pricing.depositAmount)} refundable deposit required · {listing.pricing.insuranceAvailable ? 'Protection plan available' : 'No insurance add-on'}
+              {formatCents(listing.pricing.depositAmount)} refundable deposit · returned automatically after check-out
             </p>
           </div>
 
