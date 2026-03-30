@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft, QrCode, Star, AlertTriangle, CheckCircle2, Clock, Package, Scale } from 'lucide-react'
+import { ArrowLeft, Star, AlertTriangle, CheckCircle2, Clock, Package, Scale } from 'lucide-react'
 import { auth } from '@clerk/nextjs/server'
 import { getBookingsByRenter } from '@/lib/mock-db/bookings'
 import { getListingById } from '@/lib/mock-db/listings'
@@ -46,7 +46,7 @@ export default async function RentalsPage() {
       {active.length > 0 && (
         <Section title="Active Rentals" count={active.length}>
           {active.map(b => (
-            <BookingRow key={b.id} booking={b} listing={listingMap[b.id]} showQr />
+            <BookingRow key={b.id} booking={b} listing={listingMap[b.id]} />
           ))}
         </Section>
       )}
@@ -81,10 +81,9 @@ function Section({ title, count, children }: { title: string; count: number; chi
   )
 }
 
-function BookingRow({ booking, listing, showQr, showReview }: {
+function BookingRow({ booking, listing, showReview }: {
   booking: Awaited<ReturnType<typeof getBookingsByRenter>>[0]
   listing: Awaited<ReturnType<typeof getListingById>>
-  showQr?: boolean
   showReview?: boolean
 }) {
   const cfg = STATUS_CONFIG[booking.status]
@@ -113,14 +112,6 @@ function BookingRow({ booking, listing, showQr, showReview }: {
         </p>
 
         <div className="flex gap-2 mt-2">
-          {showQr && (
-            <Link
-              href={`/bookings/${booking.id}/checkin`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold rounded-lg transition-colors"
-            >
-              <QrCode size={12}/>QR Check-Out
-            </Link>
-          )}
           {needsReview && (
             <Link
               href={`/bookings/${booking.id}/review`}

@@ -2,15 +2,15 @@ import { Search, CalendarCheck, Key, Star } from 'lucide-react'
 
 const RENTER_STEPS = [
   { icon: <Search size={24} />, title: 'Find a Tool', desc: 'Search by location, category, or keyword. Filter by price, condition, and availability.' },
-  { icon: <CalendarCheck size={24} />, title: 'Book & Pay', desc: 'Choose your dates, sign a digital waiver, and pay securely. A refundable deposit is held in escrow.' },
-  { icon: <Key size={24} />, title: 'Pick Up & Use', desc: 'Meet the owner, scan the QR code to check in, and get to work. Check out when you\'re done.' },
+  { icon: <CalendarCheck size={24} />, title: 'Request & Sign', desc: 'Choose your dates and sign a digital liability waiver. The owner approves your request.' },
+  { icon: <Key size={24} />, title: 'Pick Up & Use', desc: 'Coordinate pickup directly with the owner, pay them your agreed amount, and get to work.' },
   { icon: <Star size={24} />, title: 'Leave a Review', desc: 'Rate the tool and owner. Help build a community of trusted lenders.' },
 ]
 
 const OWNER_STEPS = [
   { icon: '📸', title: 'List Your Tool', desc: 'Upload photos, set a price (our smart suggester helps), and choose your availability.' },
   { icon: '✅', title: 'Approve Requests', desc: 'Review renter profiles and trust scores before approving. Or turn on Instant Book.' },
-  { icon: '💰', title: 'Earn & Protect', desc: 'Receive payment via Stripe. A damage deposit protects your investment.' },
+  { icon: '💰', title: 'Get Paid Directly', desc: 'Collect payment and any deposit straight from the renter at pickup — no middleman.' },
 ]
 
 export default function HowItWorks() {

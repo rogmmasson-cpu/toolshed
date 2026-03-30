@@ -1,25 +1,25 @@
-import { Shield, CreditCard, UserCheck, Zap } from 'lucide-react'
+import { Shield, MessageSquare, UserCheck, Star } from 'lucide-react'
 
 const FEATURES = [
   {
-    icon: <Shield size={28} className="text-brand-500" />,
-    title: 'Damage Deposit Escrow',
-    desc: 'A deposit is held securely and released automatically when the rental ends without incident. File a claim within 48 hours if damage occurs.',
-  },
-  {
-    icon: <CreditCard size={28} className="text-brand-500" />,
-    title: 'Secure Payments via Stripe',
-    desc: 'All transactions are processed by Stripe — bank-grade encryption, fraud detection, and instant payouts for owners.',
-  },
-  {
     icon: <UserCheck size={28} className="text-brand-500" />,
     title: 'Verified Profiles',
-    desc: 'Government ID, phone, and payment method verification builds a trust score. Know exactly who you\'re renting to or from.',
+    desc: 'Phone and identity verification builds a trust score for every user. Know exactly who you\'re renting to or from before you agree.',
   },
   {
-    icon: <Zap size={28} className="text-brand-500" />,
-    title: 'QR Check-In/Out',
-    desc: 'A scannable QR code proves pickup and return — protecting both the renter and owner in any dispute.',
+    icon: <Star size={28} className="text-brand-500" />,
+    title: 'Two-Way Reviews',
+    desc: 'After every rental, both the renter and owner leave a review. Transparent ratings keep the community honest.',
+  },
+  {
+    icon: <MessageSquare size={28} className="text-brand-500" />,
+    title: 'On-Platform Messaging',
+    desc: 'All coordination happens inside ToolShed — every message is timestamped and stored as a record for both parties.',
+  },
+  {
+    icon: <Shield size={28} className="text-brand-500" />,
+    title: 'Digital Liability Waiver',
+    desc: 'Every renter signs a binding liability waiver before pickup, clearly defining responsibilities and protecting owners.',
   },
 ]
 

@@ -28,15 +28,15 @@ const pillars = [
   {
     icon: Shield,
     color: 'bg-brand-50 text-brand-600',
-    title: 'QR Check-In & Check-Out',
-    description: 'Our QR-based handoff flow creates a time-stamped record of when a tool changed hands. Combined with photos, it\'s the clearest evidence available if anything goes wrong.',
+    title: 'Digital Liability Waiver',
+    description: 'Every renter signs a binding digital waiver before pickup. It clearly defines each party\'s responsibilities and is timestamped — giving owners a solid paper trail if anything goes wrong.',
   },
 ]
 
 const safetyTips = {
   renters: [
     'Read the listing description fully — check photos and condition notes.',
-    'Use the check-in flow to document the tool\'s condition at pickup.',
+    'Take photos of the tool\'s condition at pickup and share them with the owner via messages.',
     'Ask the Owner any questions about safe operation before you leave.',
     'Never use a tool for a purpose it wasn\'t designed for.',
     'Return tools clean and on time to protect your review score.',
@@ -45,7 +45,7 @@ const safetyTips = {
     'Be accurate about your tool\'s condition — honesty builds trust.',
     'Check that all safety guards and accessories are included.',
     'Review a Renter\'s rating before approving a booking.',
-    'Use the check-out flow to document condition before handoff.',
+    'Take photos of the tool before handing it back and send them via the message thread.',
     'Set a fair security deposit relative to the tool\'s value.',
   ],
 }
