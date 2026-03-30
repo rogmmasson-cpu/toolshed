@@ -38,7 +38,6 @@ export default function Footer() {
               <li><Link href="/listings/new" className="hover:text-white transition-colors">Create a Listing</Link></li>
               <li><Link href="/dashboard" className="hover:text-white transition-colors">Owner Dashboard</Link></li>
               <li><Link href="/pricing-guide" className="hover:text-white transition-colors">Smart Pricing Guide</Link></li>
-              <li><Link href="/insurance" className="hover:text-white transition-colors">Insurance & Protection</Link></li>
             </ul>
           </div>
 
@@ -55,13 +54,19 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Affiliate disclosure */}
+        <p className="mt-8 text-xs text-gray-600 leading-relaxed border-t border-gray-800 pt-6">
+          <span className="font-medium text-gray-500">Affiliate Disclosure:</span> ToolShed participates in the Amazon Services LLC Associates Program and other affiliate advertising programs. We earn commissions on qualifying purchases made through links on this site at no extra cost to you.{' '}
+          ToolShed does not process payments or hold deposits — all financial arrangements are made directly between renters and owners.
+        </p>
+
+        <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500">© 2026 ToolShed, Inc. All rights reserved.</p>
-          <div className="flex gap-4 text-xs text-gray-500">
+          <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500">
             <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white">Terms of Service</Link>
-            <Link href="/liability" className="hover:text-white">Liability Waiver</Link>
             <Link href="/cookies" className="hover:text-white">Cookie Policy</Link>
+            <a href="https://optout.aboutads.info" target="_blank" rel="noopener noreferrer" className="hover:text-white">Ad Opt-Out</a>
           </div>
           <p className="text-xs text-gray-600 flex items-center gap-1">
             Made with <Heart size={10} className="text-red-400 fill-red-400" /> in Fairhaven, MA

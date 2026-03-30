@@ -7,6 +7,8 @@ import ListingFilters from '@/components/listings/ListingFilters'
 import MobileFilterDrawer from '@/components/listings/MobileFilterDrawer'
 import { ListingCardSkeleton } from '@/components/ui/Skeleton'
 import { MapPin } from 'lucide-react'
+import AffiliateRecommendations from '@/components/listings/AffiliateRecommendations'
+import { getCategoryDef } from '@/lib/constants/categories'
 
 interface BrowsePageProps {
   searchParams: Promise<{
@@ -114,6 +116,16 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
               <ListingGrid filters={filters} />
             </Suspense>
           </div>
+
+          {/* Affiliate strip — shown when a category is active */}
+          {filters.category && (
+            <div className="mt-10">
+              <AffiliateRecommendations
+                category={filters.category}
+                listingTitle={getCategoryDef(filters.category).description}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

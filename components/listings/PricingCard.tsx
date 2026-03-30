@@ -88,13 +88,16 @@ export default function PricingCard({ listing }: { listing: ListingWithOwner }) 
             <span className="font-bold text-gray-900">{formatCents(pricing.totalCharge)}</span>
           </div>
           <div className="flex justify-between text-xs text-gray-500">
-            <span>Refundable deposit</span>
+            <span>Deposit (owner-held, est.)</span>
             <span>+ {formatCents(listing.pricing.depositAmount)}</span>
           </div>
           <div className="border-t border-gray-200 pt-2 flex justify-between font-semibold text-gray-900">
-            <span>Due at booking</span>
+            <span>Estimated total</span>
             <span>{formatCents(pricing.totalWithDeposit)}</span>
           </div>
+          <p className="text-[11px] text-gray-400 leading-relaxed pt-1">
+            ToolShed does not collect payments. Payment is arranged directly with the owner.
+          </p>
         </div>
       )}
 
@@ -119,7 +122,7 @@ export default function PricingCard({ listing }: { listing: ListingWithOwner }) 
       <div className="flex items-start gap-2 text-xs text-gray-500">
         <Shield size={14} className="text-forest-500 flex-shrink-0 mt-0.5" />
         <p>
-          <span className="font-medium text-gray-700">{formatCents(listing.pricing.depositAmount)} deposit</span> held securely — fully refunded after check-out if no damage.
+          <span className="font-medium text-gray-700">{formatCents(listing.pricing.depositAmount)} deposit</span> — held by the owner and returned after check-out if no damage. ToolShed does not hold deposits.
         </p>
       </div>
 

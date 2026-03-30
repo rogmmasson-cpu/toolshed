@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, Check, CreditCard } from 'lucide-react'
+import { ChevronRight, Check, Info, Shield, MessageSquare } from 'lucide-react'
 import { calcDaysBetween } from '@/lib/utils/availability'
 import { ListingWithOwner } from '@/lib/types'
 import { formatCents } from '@/lib/utils/formatting'
@@ -9,14 +9,14 @@ import { calcBookingPricing } from '@/lib/utils/pricing'
 import { createBooking } from '@/lib/actions/bookings'
 import BookingSummary from '@/components/booking/BookingSummary'
 import WaiverText from '@/components/booking/WaiverText'
+import AffiliateRecommendations from '@/components/listings/AffiliateRecommendations'
 import Button from '@/components/ui/Button'
 import { cn } from '@/lib/utils/cn'
 
 const STEPS = [
   { id: 1, label: 'Dates' },
   { id: 2, label: 'Waiver' },
-  { id: 3, label: 'Payment' },
-  { id: 4, label: 'Confirm' },
+  { id: 3, label: 'Confirm' },
 ]
 
 interface Props {
@@ -122,12 +122,26 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
               </div>
               <div className="bg-gray-50 rounded-xl p-4 space-y-1">
                 <p className="text-sm text-gray-600">Duration: <span className="font-semibold text-gray-900">{days} day{days !== 1 ? 's' : ''}</span></p>
-                <p className="text-sm text-gray-600">Rental total: <span className="font-semibold text-gray-900">{formatCents(pricing.totalCharge)}</span></p>
-                <p className="text-sm text-gray-600">Refundable deposit: <span className="font-semibold text-gray-900">+ {formatCents(pricing.depositAmount)}</span></p>
-                <p className="text-sm font-semibold text-gray-900 pt-1 border-t border-gray-200">Due at booking: {formatCents(pricing.totalWithDeposit)}</p>
+                <p className="text-sm text-gray-600">Rental rate: <span className="font-semibold text-gray-900">{formatCents(pricing.totalCharge)}</span></p>
+                <p className="text-sm text-gray-600">Deposit (owner-held): <span className="font-semibold text-gray-900">+ {formatCents(pricing.depositAmount)}</span></p>
+                <p className="text-sm font-semibold text-gray-900 pt-1 border-t border-gray-200">Estimated total: {formatCents(pricing.totalWithDeposit)}</p>
               </div>
+
+              {/* Payment disclaimer */}
+              <div className="flex gap-2.5 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <Info size={16} className="text-blue-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-800 space-y-1">
+                  <p className="font-semibold">ToolShed does not collect payments or deposits.</p>
+                  <p className="text-blue-700 text-xs leading-relaxed">
+                    Payment and any deposit are arranged directly between you and{' '}
+                    <span className="font-medium">{listing.owner.name}</span> after your request is
+                    accepted. Amounts shown are estimates based on the owner&apos;s listed rates.
+                  </p>
+                </div>
+              </div>
+
               <p className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-3">
-                📍 You&apos;ll coordinate exact pickup location with {listing.owner.name} after booking is confirmed.
+                📍 You&apos;ll coordinate exact pickup location and payment method with {listing.owner.name} after booking is confirmed.
               </p>
               <Button className="w-full" onClick={() => setStep(2)}>
                 Continue to Waiver →
@@ -176,56 +190,20 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
             </div>
           )}
 
-          {/* Step 3: Payment */}
+          {/* Step 3: Confirm */}
           {step === 3 && (
             <div className="card p-6 space-y-5">
-              <h2 className="text-lg font-semibold text-gray-900">Payment Details</h2>
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700">
-                <p className="font-semibold mb-1">🔒 Secure checkout powered by Stripe</p>
-                <p>Your payment info is encrypted and never stored by ToolShed.</p>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Card Number</label>
-                  <div className="input-base flex items-center gap-2">
-                    <CreditCard size={18} className="text-gray-400" />
-                    <input type="text" placeholder="4242 4242 4242 4242" className="flex-1 outline-none text-sm" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Expiry</label>
-                    <input type="text" placeholder="MM / YY" className="input-base" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">CVV</label>
-                    <input type="text" placeholder="•••" className="input-base" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Name on Card</label>
-                  <input type="text" placeholder="Your name" className="input-base" />
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <Button variant="secondary" onClick={() => setStep(2)}>← Back</Button>
-                <Button className="flex-1" onClick={() => setStep(4)}>Review & Confirm →</Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Confirm */}
-          {step === 4 && (
-            <div className="card p-6 space-y-5">
               <h2 className="text-lg font-semibold text-gray-900">Review & Confirm</h2>
+
+              {/* Booking summary rows */}
               <div className="space-y-3 text-sm">
                 {[
                   { label: 'Item', value: listing.title },
                   { label: 'Dates', value: `${startDate} → ${endDate} (${days} day${days !== 1 ? 's' : ''})` },
                   { label: 'Waiver', value: waiverSigned ? `Signed as "${signature}"` : '⚠ Not yet signed' },
-                  { label: 'Rental total', value: formatCents(pricing.totalCharge) },
-                  { label: 'Refundable deposit', value: `+ ${formatCents(pricing.depositAmount)}` },
-                  { label: 'Due at booking', value: formatCents(pricing.totalWithDeposit) },
+                  { label: 'Rental rate', value: formatCents(pricing.totalCharge) },
+                  { label: 'Deposit (est.)', value: `+ ${formatCents(pricing.depositAmount)}` },
+                  { label: 'Estimated total', value: formatCents(pricing.totalWithDeposit) },
                 ].map((row) => (
                   <div key={row.label} className="flex justify-between py-2 border-b border-gray-100 last:border-0">
                     <span className="text-gray-500">{row.label}</span>
@@ -233,27 +211,47 @@ export default function BookingFlow({ listing, startDate, endDate }: Props) {
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-gray-500">
-                {formatCents(pricing.totalWithDeposit)} will be authorized on your card — {formatCents(pricing.totalCharge)} rental + {formatCents(pricing.depositAmount)} refundable deposit. The deposit is returned automatically after check-out.
-              </p>
+
+              {/* Payment & deposit disclaimer */}
+              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-blue-900">
+                  <Info size={15} className="text-blue-500" />
+                  How payment works
+                </div>
+                <ul className="text-xs text-blue-800 space-y-1.5 leading-relaxed pl-1">
+                  <li className="flex gap-2"><MessageSquare size={12} className="text-blue-400 flex-shrink-0 mt-0.5" />
+                    Once your request is accepted, you and <span className="font-medium">{listing.owner.name}</span> will coordinate payment directly via the ToolShed message thread.
+                  </li>
+                  <li className="flex gap-2"><Shield size={12} className="text-blue-400 flex-shrink-0 mt-0.5" />
+                    Any deposit is held by the owner — ToolShed does not collect, hold, or process any funds.
+                  </li>
+                  <li className="flex gap-2"><Info size={12} className="text-blue-400 flex-shrink-0 mt-0.5" />
+                    Amounts shown are estimates based on the owner&apos;s listed rates. Final amounts are agreed between you and the owner.
+                  </li>
+                </ul>
+              </div>
+
               {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
               <div className="flex gap-3">
-                <Button variant="secondary" onClick={() => setStep(3)}>← Back</Button>
+                <Button variant="secondary" onClick={() => setStep(2)}>← Back</Button>
                 <Button className="flex-1" loading={submitting} onClick={handleConfirm}>
-                  {listing.availability.instantBook ? '⚡ Confirm & Pay' : 'Send Request'}
+                  {listing.availability.instantBook ? '⚡ Confirm Request' : 'Send Booking Request'}
                 </Button>
               </div>
             </div>
           )}
         </div>
 
-        <BookingSummary
-          listing={listing}
-          startDate={startDate}
-          endDate={endDate}
-          days={days}
-          waiverSigned={waiverSigned}
-        />
+        <div className="space-y-4">
+          <BookingSummary
+            listing={listing}
+            startDate={startDate}
+            endDate={endDate}
+            days={days}
+            waiverSigned={waiverSigned}
+          />
+          <AffiliateRecommendations category={listing.category} listingTitle={listing.title} />
+        </div>
       </div>
     </div>
   )

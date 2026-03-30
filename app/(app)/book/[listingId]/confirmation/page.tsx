@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { CheckCircle2, QrCode, MessageSquare, Calendar } from 'lucide-react'
+import { getListingById } from '@/lib/mock-db/listings'
+import AffiliateRecommendations from '@/components/listings/AffiliateRecommendations'
 
 export default async function ConfirmationPage({ params, searchParams }: {
   params: Promise<{ listingId: string }>
@@ -7,6 +9,7 @@ export default async function ConfirmationPage({ params, searchParams }: {
 }) {
   const { listingId } = await params
   const sp = await searchParams
+  const listing = await getListingById(listingId)
   const confirmationCode = sp.bookingId
     ? sp.bookingId.slice(-8).toUpperCase()
     : `TS-${Date.now().toString(36).toUpperCase()}`
@@ -67,7 +70,7 @@ export default async function ConfirmationPage({ params, searchParams }: {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 mb-10">
         <Link href="/dashboard/rentals" className="btn-primary w-full justify-center">
           View My Rentals
         </Link>
@@ -78,6 +81,19 @@ export default async function ConfirmationPage({ params, searchParams }: {
           Continue browsing →
         </Link>
       </div>
+
+      {/* Affiliate recommendations — while you wait for pickup */}
+      {listing && (
+        <div className="text-left">
+          <p className="text-xs text-gray-400 text-center mb-3 uppercase tracking-wide">
+            While you wait — grab what you&apos;ll need
+          </p>
+          <AffiliateRecommendations
+            category={listing.category}
+            listingTitle={listing.title}
+          />
+        </div>
+      )}
     </div>
   )
 }

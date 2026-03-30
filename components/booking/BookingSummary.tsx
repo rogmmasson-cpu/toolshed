@@ -44,24 +44,29 @@ export default function BookingSummary({ listing, startDate, endDate, days, waiv
       </div>
 
       {/* Price breakdown */}
-      <div className="space-y-2.5 text-sm mb-5">
+      <div className="space-y-2.5 text-sm mb-4">
         <div className="flex justify-between">
           <span className="text-gray-600">{formatCents(listing.pricing.dailyRate)} × {days} day{days !== 1 ? 's' : ''}</span>
           <span className="font-medium">{formatCents(pricing.subtotal)}</span>
         </div>
         <div className="border-t border-gray-200 pt-2.5 flex justify-between font-bold text-gray-900">
-          <span>Rental total</span>
+          <span>Rental rate</span>
           <span>{formatCents(pricing.totalCharge)}</span>
         </div>
         <div className="flex justify-between text-xs text-gray-500">
-          <span className="flex items-center gap-1"><Shield size={12} className="text-forest-500" />Refundable deposit</span>
+          <span className="flex items-center gap-1"><Shield size={12} className="text-forest-500" />Deposit (owner-held, est.)</span>
           <span>+ {formatCents(pricing.depositAmount)}</span>
         </div>
         <div className="flex justify-between text-sm font-semibold text-gray-900">
-          <span>Due at booking</span>
+          <span>Estimated total</span>
           <span>{formatCents(pricing.totalWithDeposit)}</span>
         </div>
       </div>
+
+      {/* No-payment disclaimer */}
+      <p className="text-[11px] text-gray-400 bg-gray-50 rounded-lg px-3 py-2 mb-3 leading-relaxed">
+        ToolShed does not collect payments. Amounts are estimates — payment is arranged directly with the owner.
+      </p>
 
       {/* Status chip */}
       <div className={`flex items-center gap-2 text-xs rounded-lg px-3 py-2 ${waiverSigned ? 'bg-forest-50 text-forest-700' : 'bg-gray-50 text-gray-500'}`}>
