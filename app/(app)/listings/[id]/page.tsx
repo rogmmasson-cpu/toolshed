@@ -18,6 +18,7 @@ import TrustScoreCard from '@/components/profile/TrustScoreCard'
 import { getUserById } from '@/lib/mock-db/users'
 import MessageOwnerButton from '@/components/messages/MessageOwnerButton'
 import AffiliateRecommendations from '@/components/listings/AffiliateRecommendations'
+import AdUnit from '@/components/ads/AdUnit'
 
 const conditionLabels = { 'like-new': 'Like New', 'excellent': 'Excellent', 'good': 'Good', 'fair': 'Fair' }
 const conditionColors = { 'like-new': 'success', 'excellent': 'info', 'good': 'default', 'fair': 'warning' } as const
@@ -102,6 +103,9 @@ export default async function ListingDetailPage({ params }: Props) {
             <h2 className="font-semibold text-gray-900 text-lg mb-3">About this item</h2>
             <p className="text-gray-600 leading-relaxed">{listing.description}</p>
           </div>
+
+          {/* Ad unit — responsive rectangle below description */}
+          <AdUnit slot="LISTING_DETAIL_SLOT" format="auto" className="my-1" />
 
           {/* Location privacy note */}
           <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 rounded-xl px-4 py-3">

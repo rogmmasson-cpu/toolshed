@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
+import Script from 'next/script'
 import './globals.css'
+
+const ADSENSE_ID = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,7 +21,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${inter.className} min-h-screen bg-white`} suppressHydrationWarning>{children}</body>
+        <body className={`${inter.className} min-h-screen bg-white`} suppressHydrationWarning>
+          {children}
+          {ADSENSE_ID && (
+            <Script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_ID}`}
+              crossOrigin="anonymous"
+              strategy="afterInteractive"
+            />
+          )}
+        </body>
       </html>
     </ClerkProvider>
   )

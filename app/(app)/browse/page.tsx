@@ -9,6 +9,7 @@ import { ListingCardSkeleton } from '@/components/ui/Skeleton'
 import { MapPin } from 'lucide-react'
 import AffiliateRecommendations from '@/components/listings/AffiliateRecommendations'
 import { getCategoryDef } from '@/lib/constants/categories'
+import AdUnit from '@/components/ads/AdUnit'
 
 interface BrowsePageProps {
   searchParams: Promise<{
@@ -111,6 +112,9 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
         {/* Grid */}
         <div className="flex-1">
+          {/* Leaderboard ad above results */}
+          <AdUnit slot="BROWSE_TOP_SLOT" format="horizontal" className="mb-5" />
+
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
             <Suspense fallback={<>{Array.from({ length: 6 }).map((_, i) => <ListingCardSkeleton key={i} />)}</>}>
               <ListingGrid filters={filters} />
