@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Shield, Star, Lock, CheckCircle, AlertTriangle, Phone } from 'lucide-react'
+import { Shield, Star, MessageSquare, CheckCircle, AlertTriangle, Phone } from 'lucide-react'
 
 export const metadata = {
   title: 'Trust & Safety | ToolShed',
@@ -20,16 +20,16 @@ const pillars = [
     description: 'After every rental, both the Renter and Owner leave a review. Transparent ratings mean the community self-polices — bad actors get weeded out fast.',
   },
   {
-    icon: Lock,
+    icon: MessageSquare,
     color: 'bg-blue-50 text-blue-600',
-    title: 'Secure Payments',
-    description: 'All payments are processed through Stripe. Your card details never touch ToolShed servers. Funds are held in escrow and only released after a successful return.',
+    title: 'Documented Messaging',
+    description: 'All communication between Renters and Owners happens inside ToolShed. Every message is timestamped and stored, giving both parties a clear record if a dispute arises.',
   },
   {
     icon: Shield,
     color: 'bg-brand-50 text-brand-600',
-    title: 'Protection Plan',
-    description: 'Add our optional Protection Plan at checkout for up to $500 in accidental damage coverage. Peace of mind for Renters, confidence for Owners.',
+    title: 'QR Check-In & Check-Out',
+    description: 'Our QR-based handoff flow creates a time-stamped record of when a tool changed hands. Combined with photos, it\'s the clearest evidence available if anything goes wrong.',
   },
 ]
 
@@ -148,7 +148,6 @@ export default function TrustPage() {
       {/* Links */}
       <section className="py-10 px-4 border-t border-gray-100">
         <div className="container-app max-w-3xl mx-auto flex flex-wrap gap-4 text-sm">
-          <Link href="/insurance" className="text-brand-600 hover:underline">Insurance & Protection</Link>
           <Link href="/liability" className="text-brand-600 hover:underline">Liability Waiver</Link>
           <Link href="/terms" className="text-brand-600 hover:underline">Terms of Service</Link>
           <Link href="/privacy" className="text-brand-600 hover:underline">Privacy Policy</Link>
