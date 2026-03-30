@@ -16,7 +16,7 @@ export interface AffiliateSectionDef {
 
 // Associate tag read at runtime so it can be set via env var
 export const getAssociateTag = () =>
-  process.env.NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG ?? 'toolshed-20'
+  process.env.NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG ?? 'toolshed0f6-20'
 
 export const amazonSearchUrl = (query: string) =>
   `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=${getAssociateTag()}`
