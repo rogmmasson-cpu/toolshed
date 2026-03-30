@@ -23,7 +23,7 @@ export default function BookingSummary({ listing, startDate, endDate, days, waiv
         <img src={listing.photos[0]} alt={listing.title} className="w-20 h-16 rounded-xl object-cover flex-shrink-0" />
         <div>
           <p className="font-semibold text-sm text-gray-900 line-clamp-2">{listing.title}</p>
-          <p className="text-xs text-gray-500 mt-1">{formatLocation(listing.location.neighborhood, listing.location.city)}</p>
+          <p className="text-xs text-gray-500 mt-1">{formatLocation(listing.location.city, listing.location.state)}</p>
           <div className="flex items-center gap-1 mt-1">
             <Avatar src={listing.owner.avatarUrl} name={listing.owner.name} size="xs" />
             <span className="text-xs text-gray-500">{listing.owner.name}</span>

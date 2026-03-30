@@ -49,7 +49,7 @@ export default function LocalListingView({ id }: { id: string }) {
 
       <h1 className="text-2xl font-bold text-gray-900 mb-2">{listing.title}</h1>
       <p className="text-sm text-gray-500 flex items-center gap-1 mb-6">
-        <MapPin size={13} />{formatLocation(listing.location.neighborhood, listing.location.city)}
+        <MapPin size={13} />{formatLocation(listing.location.city, listing.location.state)}
       </p>
 
       <div className="grid grid-cols-3 gap-4 mb-6">

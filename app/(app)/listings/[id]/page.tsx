@@ -67,7 +67,7 @@ export default async function ListingDetailPage({ params }: Props) {
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{listing.title}</h1>
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-              <span className="flex items-center gap-1"><MapPin size={14} />{formatLocation(listing.location.neighborhood, listing.location.city)}</span>
+              <span className="flex items-center gap-1"><MapPin size={14} />{formatLocation(listing.location.city, listing.location.state)}</span>
               <StarRating rating={listing.stats.averageRating} count={listing.stats.reviewCount} size="md" />
               <span className="flex items-center gap-1"><Users size={14} />{listing.stats.totalRentals} rentals</span>
             </div>

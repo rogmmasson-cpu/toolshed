@@ -59,7 +59,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
 
           <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
             <MapPin size={11} />
-            <span>{formatLocation(listing.location.neighborhood, listing.location.city)}</span>
+            <span>{formatLocation(listing.location.city, listing.location.state)}</span>
             {listing.distanceMiles != null && (
               <span className="ml-auto flex-shrink-0 font-medium text-brand-600">
                 {listing.distanceMiles < 0.1 ? '< 0.1 mi' : `${listing.distanceMiles} mi`}
