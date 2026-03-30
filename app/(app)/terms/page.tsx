@@ -118,9 +118,11 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Governing Law & Disputes</h2>
           <p>
-            These Terms are governed by the laws of the State of Texas. Disputes shall be resolved through
-            binding arbitration in Travis County, Texas, except where prohibited by law. You waive any right
-            to a jury trial or class-action proceeding.
+            ToolShed is not a party to any dispute between a Renter and an Owner. Disputes arising from a
+            rental transaction are governed by the laws of the jurisdiction in which the exchange took place
+            and are the sole responsibility of the parties involved. ToolShed&apos;s own liability to any
+            user, if any, is governed by the laws of the state in which that user resides, without regard
+            to conflict-of-law principles.
           </p>
         </section>
 

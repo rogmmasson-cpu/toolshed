@@ -65,7 +65,7 @@ export default function WaiverText() {
 
       <div>
         <p className="font-semibold text-gray-800 mb-1">7. Governing Law</p>
-        <p>This Agreement shall be governed by the laws of the State of Texas. Any disputes shall be resolved through binding arbitration in Travis County, Texas, except where prohibited by applicable law.</p>
+        <p>This Agreement is governed by the laws of the jurisdiction in which the rental exchange takes place. ToolShed is not a party to any dispute between Renter and Owner. Any disputes arising from a rental shall be resolved between the parties under the laws of the state or locality where the item was exchanged, without regard to conflict-of-law principles.</p>
       </div>
     </div>
   )
