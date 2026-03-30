@@ -4,9 +4,9 @@ export interface AffiliateProduct {
   name: string
   description: string
   priceRange: string
-  keywords: string[]   // match against listing title for more precise recs
-  searchQuery: string  // Amazon search query string
-  tag: 'amazon' | 'home-depot' | 'lowes'
+  keywords: string[]
+  searchQuery: string
+  tag: 'amazon' | 'home-depot'
 }
 
 export interface AffiliateSectionDef {
@@ -14,15 +14,29 @@ export interface AffiliateSectionDef {
   products: AffiliateProduct[]
 }
 
-// Associate tag read at runtime so it can be set via env var
+// ── Amazon Associates ────────────────────────────────────────────────────────
 export const getAssociateTag = () =>
   process.env.NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG ?? 'toolshed0f6-20'
 
 export const amazonSearchUrl = (query: string) =>
   `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=${getAssociateTag()}`
 
-export const homeDepotSearchUrl = (query: string) =>
-  `https://www.homedepot.com/s/${encodeURIComponent(query)}?NCNI-5`
+// ── Home Depot (Impact.com) ──────────────────────────────────────────────────
+// Sign up: https://www.impactradius.com/brand-signup/ → search "Home Depot"
+// Once approved, set NEXT_PUBLIC_HOME_DEPOT_IMPACT_ID to your Impact publisher ID.
+// Without it, links go directly to homedepot.com (still works, just untracked).
+export const getHomeDepotImpactId = () =>
+  process.env.NEXT_PUBLIC_HOME_DEPOT_IMPACT_ID ?? ''
+
+export const homeDepotSearchUrl = (query: string) => {
+  const dest = `https://www.homedepot.com/s/${encodeURIComponent(query)}`
+  const impactId = getHomeDepotImpactId()
+  if (impactId) {
+    // Impact.com deep-link format for Home Depot (offer 1602185, campaign 17276)
+    return `https://goto.homedepot.com/c/${impactId}/1602185/17276?u=${encodeURIComponent(dest)}`
+  }
+  return dest
+}
 
 // ── Per-category affiliate product definitions ──────────────────────────────
 
@@ -718,4 +732,401 @@ export function getAffiliateProducts(
   })
 
   return { section, products: sorted.slice(0, maxProducts) }
+}
+
+// ── Home Depot product map ───────────────────────────────────────────────────
+// Focused on HD's strengths: building materials, paint, lumber, bulk hardware,
+// plumbing fixtures, electrical supplies, garden center — complementary to Amazon.
+
+const HD_MAP: Partial<Record<ToolCategory, AffiliateProduct[]>> = {
+  'power-tools': [
+    {
+      name: 'Wood Screws (1 lb box assorted)',
+      description: 'Coarse-thread screws in #6, #8, #10 — covers most projects',
+      priceRange: '$8 – $18',
+      keywords: ['drill', 'driver', 'screw'],
+      searchQuery: 'wood screws assorted 1 lb box',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Sandpaper Sheets (assorted, 25-pk)',
+      description: '60 / 80 / 120 / 220 grit — stock up before you sand',
+      priceRange: '$8 – $16',
+      keywords: ['sander', 'grinder', 'orbital'],
+      searchQuery: 'sandpaper sheets assorted grit 25 pack',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Construction Adhesive (tube)',
+      description: 'Liquid Nails or Loctite PL — bonds wood, concrete & more',
+      priceRange: '$5 – $10',
+      keywords: ['nailer', 'brad', 'finish'],
+      searchQuery: 'construction adhesive liquid nails tube',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Safety Goggles',
+      description: 'Anti-fog wraparound goggles for cutting & grinding',
+      priceRange: '$6 – $16',
+      keywords: [],
+      searchQuery: 'safety goggles anti-fog wraparound',
+      tag: 'home-depot',
+    },
+  ],
+
+  'hand-tools': [
+    {
+      name: 'Drywall Anchors & Screws Kit',
+      description: 'Assorted toggle bolts, plastic anchors & screws',
+      priceRange: '$6 – $14',
+      keywords: ['screw', 'drill', 'wall'],
+      searchQuery: 'drywall anchors screws assorted kit',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Utility Knife + Blades (10-pk)',
+      description: 'Retractable box cutter with replacement blades',
+      priceRange: '$6 – $12',
+      keywords: [],
+      searchQuery: 'utility knife replacement blades 10 pack retractable',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Stud Finder',
+      description: 'Magnetic or electronic — finds studs, live wires & pipes',
+      priceRange: '$12 – $30',
+      keywords: ['level', 'square', 'framing'],
+      searchQuery: 'stud finder electronic magnetic wall',
+      tag: 'home-depot',
+    },
+  ],
+
+  'garden': [
+    {
+      name: 'Garden Soil (1 cu ft bag)',
+      description: 'Miracle-Gro or equivalent enriched garden soil',
+      priceRange: '$8 – $14',
+      keywords: ['tiller', 'aerator', 'cultivator'],
+      searchQuery: 'garden soil 1 cubic foot bag',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Mulch (2 cu ft bag)',
+      description: 'Hardwood or cedar mulch for beds & borders',
+      priceRange: '$5 – $10',
+      keywords: ['mower', 'edger', 'blower'],
+      searchQuery: 'mulch 2 cubic foot bag hardwood cedar',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Garden Hose (50 ft)',
+      description: 'Kink-resistant expandable hose with spray nozzle',
+      priceRange: '$18 – $40',
+      keywords: ['sprinkler', 'irrigation', 'water'],
+      searchQuery: 'garden hose 50 ft kink resistant',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Weed Barrier Fabric (3×50 ft)',
+      description: 'Landscape fabric for beds and pathways',
+      priceRange: '$10 – $20',
+      keywords: ['tiller', 'edger'],
+      searchQuery: 'weed barrier landscape fabric 3x50',
+      tag: 'home-depot',
+    },
+  ],
+
+  'cleaning': [
+    {
+      name: 'Zep Heavy-Duty Degreaser',
+      description: 'Commercial-strength spray for concrete, grease & grime',
+      priceRange: '$8 – $14',
+      keywords: ['pressure washer', 'power wash', 'steam'],
+      searchQuery: 'Zep heavy duty degreaser spray',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Shop-Vac Filters & Bags',
+      description: 'OEM-compatible cartridge filter + collection bags',
+      priceRange: '$10 – $20',
+      keywords: ['vacuum', 'shop vac', 'shop-vac'],
+      searchQuery: 'shop vac filter bags replacement',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Pressure Washer Surface Cleaner',
+      description: 'Spin-arm attachment for fast, streak-free driveway cleaning',
+      priceRange: '$25 – $55',
+      keywords: ['pressure washer', 'power wash'],
+      searchQuery: 'pressure washer surface cleaner attachment',
+      tag: 'home-depot',
+    },
+  ],
+
+  'automotive': [
+    {
+      name: 'Oil Drain Pan (5 qt)',
+      description: 'Low-profile pan with pour spout for oil changes',
+      priceRange: '$8 – $16',
+      keywords: ['jack', 'oil', 'drain'],
+      searchQuery: 'oil drain pan 5 quart pour spout',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Floor Dry Absorbent (50 lb)',
+      description: 'Clay-based spill absorbent for oil, gas & fluids',
+      priceRange: '$10 – $20',
+      keywords: [],
+      searchQuery: 'floor dry absorbent oil spill 50 lb',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Automotive Touch-Up Spray Paint',
+      description: 'Rust-Oleum enamel for undercarriage & trim',
+      priceRange: '$6 – $12',
+      keywords: ['paint', 'body', 'rust'],
+      searchQuery: 'automotive touch up spray paint rust-oleum',
+      tag: 'home-depot',
+    },
+  ],
+
+  'construction': [
+    {
+      name: 'Quikrete Fast-Setting Concrete (50 lb)',
+      description: 'Sets in 20–40 min — posts, footings & repairs',
+      priceRange: '$8 – $14',
+      keywords: ['mixer', 'concrete', 'post'],
+      searchQuery: 'quikrete fast setting concrete mix 50 lb',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Deck Screws (5 lb box, 3")',
+      description: 'Coarse-thread exterior screws, weather-resistant coating',
+      priceRange: '$14 – $24',
+      keywords: ['nailer', 'drill', 'deck', 'framing'],
+      searchQuery: 'deck screws 3 inch 5 lb box exterior',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Drywall (4×8 sheet)',
+      description: '1/2" or 5/8" standard gypsum — available for in-store pickup',
+      priceRange: '$12 – $18',
+      keywords: ['drywall', 'sheetrock', 'wall'],
+      searchQuery: 'drywall 4x8 1/2 inch gypsum board',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Construction Foam & Caulk Kit',
+      description: 'Great Stuff expanding foam + paintable latex caulk',
+      priceRange: '$10 – $20',
+      keywords: ['framing', 'insulation', 'window', 'door'],
+      searchQuery: 'great stuff expanding foam caulk kit',
+      tag: 'home-depot',
+    },
+  ],
+
+  'painting': [
+    {
+      name: 'Interior Paint (1 gal, custom mix)',
+      description: 'Custom-mixed in any color in-store — flat, eggshell or semi-gloss',
+      priceRange: '$28 – $55',
+      keywords: [],
+      searchQuery: 'interior paint 1 gallon eggshell',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Purdy Nylox Brush Set',
+      description: '2" & 3" angle sash brushes — pro-grade nylon/polyester blend',
+      priceRange: '$14 – $28',
+      keywords: ['brush', 'paint'],
+      searchQuery: 'Purdy paint brush set angle sash nylox',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Primer (1 gal)',
+      description: 'PVA or drywall primer for new surfaces & stain blocking',
+      priceRange: '$16 – $30',
+      keywords: ['prime', 'primer', 'drywall', 'spray'],
+      searchQuery: 'interior primer 1 gallon PVA drywall',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Paintable Caulk (6-pk)',
+      description: 'DAP Alex Plus latex caulk — fills gaps before painting',
+      priceRange: '$12 – $20',
+      keywords: [],
+      searchQuery: 'paintable latex caulk DAP 6 pack',
+      tag: 'home-depot',
+    },
+  ],
+
+  'plumbing': [
+    {
+      name: 'SharkBite Push-to-Connect Fittings',
+      description: 'No-solder elbows, couplings & tees for 1/2" – 3/4" pipe',
+      priceRange: '$6 – $18 each',
+      keywords: ['copper', 'pex', 'pipe'],
+      searchQuery: 'SharkBite push connect fittings 1/2 inch',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Toilet Wax Ring + Bolts',
+      description: 'Standard wax seal with plastic horn — fits all toilets',
+      priceRange: '$8 – $14',
+      keywords: ['toilet', 'flange', 'drain'],
+      searchQuery: 'toilet wax ring bolts standard horn',
+      tag: 'home-depot',
+    },
+    {
+      name: 'P-Trap Kit (1-1/2")',
+      description: 'PVC P-trap with extension & slip joint for sink drains',
+      priceRange: '$6 – $12',
+      keywords: ['drain', 'sink', 'trap'],
+      searchQuery: 'PVC P-trap kit 1-1/2 inch sink drain',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Faucet Supply Lines (2-pk)',
+      description: 'Braided stainless 12" lines for hot & cold connections',
+      priceRange: '$8 – $14',
+      keywords: ['faucet', 'sink', 'supply'],
+      searchQuery: 'braided faucet supply lines 12 inch stainless 2 pack',
+      tag: 'home-depot',
+    },
+  ],
+
+  'electrical': [
+    {
+      name: 'Romex Wire (25 ft, 14-2)',
+      description: 'NM-B sheathed cable for 15-amp circuits',
+      priceRange: '$20 – $35',
+      keywords: ['wire', 'romex', 'circuit'],
+      searchQuery: 'romex 14-2 NM-B wire 25 ft',
+      tag: 'home-depot',
+    },
+    {
+      name: 'GFCI Outlet (2-pk)',
+      description: '15A tamper-resistant GFCI receptacle — kitchens, baths & outdoors',
+      priceRange: '$16 – $28',
+      keywords: ['outlet', 'receptacle', 'gfci'],
+      searchQuery: 'GFCI outlet 15A tamper resistant 2 pack',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Electrical Junction Box',
+      description: 'Single-gang PVC or metal new-work box',
+      priceRange: '$1 – $5',
+      keywords: ['box', 'outlet', 'switch'],
+      searchQuery: 'electrical junction box single gang new work',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Circuit Breaker (15A or 20A)',
+      description: 'Square D or Eaton single-pole breaker — specify your panel brand',
+      priceRange: '$8 – $18',
+      keywords: ['panel', 'breaker', 'circuit'],
+      searchQuery: 'single pole circuit breaker 15 amp 20 amp',
+      tag: 'home-depot',
+    },
+  ],
+
+  'moving': [
+    {
+      name: 'Moving Boxes Bundle (10-pk)',
+      description: 'Medium corrugated boxes — available for same-day in-store pickup',
+      priceRange: '$12 – $22',
+      keywords: [],
+      searchQuery: 'moving boxes medium 10 pack corrugated',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Moving Blankets (4-pk)',
+      description: 'Woven furniture pads — protects appliances, tables & mirrors',
+      priceRange: '$20 – $40',
+      keywords: ['dolly', 'furniture', 'appliance'],
+      searchQuery: 'moving blankets furniture pads 4 pack',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Heavy-Duty Rope (50 ft)',
+      description: '3/8" braided nylon — secure loads on trucks or trailers',
+      priceRange: '$10 – $18',
+      keywords: ['truck', 'trailer', 'cart'],
+      searchQuery: 'nylon rope 3/8 inch 50 ft braided',
+      tag: 'home-depot',
+    },
+  ],
+
+  'outdoor': [
+    {
+      name: 'Propane Tank (20 lb)',
+      description: 'Pre-filled 20 lb propane tank — or exchange your empty at store',
+      priceRange: '$18 – $28 (exchange)',
+      keywords: ['grill', 'heater', 'stove', 'generator'],
+      searchQuery: 'propane tank 20 lb exchange',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Extension Cord Reel (100 ft)',
+      description: '12 AWG retractable reel — ideal for generators & outdoor tools',
+      priceRange: '$35 – $65',
+      keywords: ['generator', 'compressor', 'outdoor'],
+      searchQuery: 'extension cord reel 100 ft 12 AWG retractable',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Ground Stakes & Tie-Down Kit',
+      description: 'Auger stakes + ratchet straps for tent and canopy anchoring',
+      priceRange: '$12 – $25',
+      keywords: ['tent', 'canopy', 'pop-up'],
+      searchQuery: 'ground stakes auger tent tie down kit',
+      tag: 'home-depot',
+    },
+  ],
+
+  'trailers': [
+    {
+      name: 'Trailer Coupler Lock',
+      description: 'Hardened steel ball coupler lock — deters theft during storage',
+      priceRange: '$14 – $28',
+      keywords: [],
+      searchQuery: 'trailer coupler lock ball hitch security',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Safety Chains (pair)',
+      description: 'Class III safety chains with J-hooks — 5,000 lb rating',
+      priceRange: '$12 – $22',
+      keywords: [],
+      searchQuery: 'trailer safety chains pair J hooks class 3',
+      tag: 'home-depot',
+    },
+    {
+      name: 'Exterior LED Trailer Light Kit',
+      description: 'DOT-approved stop/tail/turn light kit for utility trailers',
+      priceRange: '$18 – $35',
+      keywords: [],
+      searchQuery: 'trailer light kit LED DOT exterior',
+      tag: 'home-depot',
+    },
+  ],
+}
+
+// ── Helper: get Home Depot products for a category ───────────────────────────
+
+export function getHomeDepotProducts(
+  category: ToolCategory,
+  listingTitle: string,
+  maxProducts = 3,
+): AffiliateProduct[] {
+  const products = HD_MAP[category] ?? HD_MAP['power-tools'] ?? []
+  const titleLower = listingTitle.toLowerCase()
+
+  const sorted = [...products].sort((a, b) => {
+    const aMatch = a.keywords.some((k) => titleLower.includes(k)) ? 1 : 0
+    const bMatch = b.keywords.some((k) => titleLower.includes(k)) ? 1 : 0
+    return bMatch - aMatch
+  })
+
+  return sorted.slice(0, maxProducts)
 }
