@@ -17,6 +17,7 @@ import Badge from '@/components/ui/Badge'
 import TrustScoreCard from '@/components/profile/TrustScoreCard'
 import { getUserById } from '@/lib/mock-db/users'
 import MessageOwnerButton from '@/components/messages/MessageOwnerButton'
+import AffiliateRecommendations from '@/components/listings/AffiliateRecommendations'
 
 const conditionLabels = { 'like-new': 'Like New', 'excellent': 'Excellent', 'good': 'Good', 'fair': 'Fair' }
 const conditionColors = { 'like-new': 'success', 'excellent': 'info', 'good': 'default', 'fair': 'warning' } as const
@@ -150,6 +151,9 @@ export default async function ListingDetailPage({ params }: Props) {
               </ul>
             </div>
           )}
+
+          {/* Affiliate recommendations */}
+          <AffiliateRecommendations category={listing.category} listingTitle={listing.title} />
 
           {/* Pricing breakdown */}
           <div>
