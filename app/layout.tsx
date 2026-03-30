@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   keywords: ['tool rental', 'tool sharing', 'rent tools', 'borrow tools', 'peer to peer'],
   other: {
     'impact-site-verification': 'f03296cb-4402-458c-b9ae-c38a0317a65f',
+    'google-adsense-account': 'ca-pub-3197998172043979',
   },
 }
 
