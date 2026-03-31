@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, Check, Camera, DollarSign, Info, MapPin, LocateFixed, Loader2, X } from 'lucide-react'
+import { ChevronRight, Check, Camera, DollarSign, Info, MapPin, LocateFixed, Loader2, X, Scan, Sparkles } from 'lucide-react'
 import { CATEGORIES } from '@/lib/constants/categories'
 import { ToolCategory, ToolCondition } from '@/lib/types'
 import { createListing } from '@/lib/actions/listings'
@@ -11,6 +11,10 @@ import { formatCents } from '@/lib/utils/formatting'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { cn } from '@/lib/utils/cn'
+import dynamic from 'next/dynamic'
+import type { UpcScanResult } from '@/components/listings/UpcScanner'
+
+const UpcScanner = dynamic(() => import('@/components/listings/UpcScanner'), { ssr: false })
 
 const CONDITIONS: { value: ToolCondition; label: string; desc: string }[] = [
   { value: 'like-new', label: 'Like New', desc: 'Used once or twice, perfect condition' },
@@ -131,6 +135,38 @@ export default function NewListingPage() {
   ][step]
 
   const [submitting, setSubmitting] = useState(false)
+  const [showScanner, setShowScanner] = useState(false)
+  const [upcAutoFilled, setUpcAutoFilled] = useState(false)
+
+  function handleUpcResult(result: UpcScanResult) {
+    setShowScanner(false)
+    setForm(prev => ({
+      ...prev,
+      title: result.title || prev.title,
+      brand: result.brand || prev.brand,
+      model: result.model || prev.model,
+      description: result.description || prev.description,
+      category: (result.category || prev.category) as ToolCategory | '',
+      retailValue: result.retailPrice ? String(result.retailPrice) : prev.retailValue,
+    }))
+    // Pre-load product image if we don't have photos yet
+    if (result.images.length > 0 && photos.length === 0) {
+      setPhotos(result.images.slice(0, 2))
+    }
+    // Auto-suggest pricing if we got a retail price and category
+    if (result.retailPrice && result.category) {
+      const suggestion = getSmartPricingSuggestion(
+        Math.round(result.retailPrice * 100),
+        result.category as ToolCategory,
+      )
+      setForm(prev => ({
+        ...prev,
+        dailyRate: (suggestion.suggestedDailyRate / 100).toFixed(2),
+        depositAmount: (suggestion.suggestedDepositRate / 100).toFixed(2),
+      }))
+    }
+    setUpcAutoFilled(true)
+  }
 
   async function handleSubmit() {
     setSubmitting(true)
@@ -170,6 +206,9 @@ export default function NewListingPage() {
 
   return (
     <div className="container-app py-8 max-w-2xl">
+      {showScanner && (
+        <UpcScanner onResult={handleUpcResult} onClose={() => setShowScanner(false)} />
+      )}
       <h1 className="text-2xl font-bold text-gray-900 mb-2">List Your Tool</h1>
       <p className="text-gray-500 mb-6">Share what you own and start earning.</p>
 
@@ -194,7 +233,29 @@ export default function NewListingPage() {
         {/* Step 0: Basics */}
         {step === 0 && (
           <div className="space-y-5">
-            <h2 className="font-semibold text-gray-900 text-lg">Basic Information</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-gray-900 text-lg">Basic Information</h2>
+              <button
+                type="button"
+                onClick={() => setShowScanner(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold rounded-xl transition-colors"
+              >
+                <Scan size={13} />Scan Barcode
+              </button>
+            </div>
+
+            {upcAutoFilled && (
+              <div className="flex items-start gap-2 bg-forest-50 border border-forest-200 rounded-xl px-3 py-2.5">
+                <Sparkles size={14} className="text-forest-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-forest-700">
+                  <span className="font-semibold">Auto-filled from barcode.</span> Review and edit the details before continuing.
+                </p>
+                <button onClick={() => setUpcAutoFilled(false)} className="ml-auto text-forest-500 hover:text-forest-700">
+                  <X size={13} />
+                </button>
+              </div>
+            )}
+
             <Input
               label="Listing Title"
               placeholder='e.g. "DeWalt 20V Cordless Drill Kit"'
