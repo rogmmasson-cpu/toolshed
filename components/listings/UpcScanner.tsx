@@ -1,6 +1,8 @@
 'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library'
+import { BrowserMultiFormatReader, BrowserCodeReader } from '@zxing/browser'
+import { NotFoundException } from '@zxing/library'
+import type { IScannerControls } from '@zxing/browser'
 import { Scan, X, Loader2, Camera, AlertCircle } from 'lucide-react'
 import { ToolCategory } from '@/lib/types'
 
@@ -23,43 +25,14 @@ type ScanState = 'idle' | 'scanning' | 'looking-up' | 'error'
 
 export default function UpcScanner({ onResult, onClose }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
+  const controlsRef = useRef<IScannerControls | null>(null)
   const [scanState, setScanState] = useState<ScanState>('idle')
   const [error, setError] = useState('')
   const [manualUpc, setManualUpc] = useState('')
 
-  const startScanning = useCallback(async () => {
-    setScanState('scanning')
-    setError('')
-    try {
-      const reader = new BrowserMultiFormatReader()
-      readerRef.current = reader
-      const devices = await BrowserMultiFormatReader.listVideoInputDevices()
-      // Prefer back camera on mobile
-      const device = devices.find(d => /back|rear|environment/i.test(d.label)) ?? devices[0]
-      if (!device) throw new Error('No camera found')
-
-      await reader.decodeFromVideoDevice(device.deviceId, videoRef.current!, async (result, err) => {
-        if (result) {
-          reader.reset()
-          await lookupUpc(result.getText())
-        } else if (err && !(err instanceof NotFoundException)) {
-          console.warn('Scan error:', err)
-        }
-      })
-    } catch (e) {
-      setScanState('error')
-      setError(e instanceof Error ? e.message : 'Camera unavailable')
-    }
-  }, [])
-
-  useEffect(() => {
-    startScanning()
-    return () => { readerRef.current?.reset() }
-  }, [startScanning])
-
   async function lookupUpc(upc: string) {
-    readerRef.current?.reset()
+    controlsRef.current?.stop()
+    controlsRef.current = null
     setScanState('looking-up')
     setError('')
     try {
@@ -75,6 +48,44 @@ export default function UpcScanner({ onResult, onClose }: Props) {
       setError(e instanceof Error ? e.message : 'Lookup failed')
     }
   }
+
+  const startScanning = useCallback(async () => {
+    controlsRef.current?.stop()
+    controlsRef.current = null
+    setScanState('scanning')
+    setError('')
+    try {
+      const reader = new BrowserMultiFormatReader()
+      const devices = await BrowserCodeReader.listVideoInputDevices()
+      // Prefer back camera on mobile
+      const device = devices.find(d => /back|rear|environment/i.test(d.label)) ?? devices[0]
+      if (!device) throw new Error('No camera found')
+
+      let handled = false
+      const controls = await reader.decodeFromVideoDevice(
+        device.deviceId,
+        videoRef.current!,
+        async (result, err) => {
+          if (result && !handled) {
+            handled = true
+            await lookupUpc(result.getText())
+          } else if (err && !(err instanceof NotFoundException)) {
+            console.warn('Scan error:', err)
+          }
+        }
+      )
+      controlsRef.current = controls
+    } catch (e) {
+      setScanState('error')
+      setError(e instanceof Error ? e.message : 'Camera unavailable')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    startScanning()
+    return () => { controlsRef.current?.stop() }
+  }, [startScanning])
 
   async function handleManualSubmit(e: React.FormEvent) {
     e.preventDefault()
