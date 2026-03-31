@@ -35,7 +35,7 @@ export default async function DashboardPage() {
     { label: 'Total Earned', value: formatCents(totalEarnings), icon: <DollarSign size={20} />, color: 'text-forest-600 bg-forest-50' },
     { label: 'Active Listings', value: myListings.filter(l => l.status === 'active').length, icon: <Package size={20} />, color: 'text-brand-600 bg-brand-50' },
     { label: 'Pending Requests', value: pendingRequests.length, icon: <Clock size={20} />, color: 'text-yellow-600 bg-yellow-50' },
-    { label: 'Trust Score', value: user?.trustScore ?? 0, icon: <Star size={20} />, color: 'text-purple-600 bg-purple-50' },
+    { label: 'Active Rentals', value: activeRentals.length, icon: <Star size={20} />, color: 'text-purple-600 bg-purple-50' },
   ]
 
   return (
@@ -148,7 +148,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Trust score */}
+        {/* Verified Profile */}
         <div>
           {user && <TrustScoreCard user={user} />}
 

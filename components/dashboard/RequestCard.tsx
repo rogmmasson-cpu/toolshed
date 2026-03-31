@@ -99,7 +99,6 @@ export default function RequestCard({ booking, listing, renter }: RequestCardPro
             <div className="flex items-center gap-2 mt-2">
               <Avatar src={renter.avatarUrl} name={renter.name} size="xs" />
               <span className="text-xs text-gray-700 font-medium">{renter.name}</span>
-              <span className="text-xs text-gray-400">· Trust {renter.trustScore}</span>
               <span className="text-xs text-gray-400">· {timeAgo(booking.createdAt)}</span>
             </div>
           )}

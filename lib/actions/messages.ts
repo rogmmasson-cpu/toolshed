@@ -57,6 +57,30 @@ export async function getOrCreateConversation(
   return conv.id
 }
 
+export async function fetchMessages(conversationId: string, since: string): Promise<{ id: string; conversationId: string; senderId: string; senderName: string; senderAvatar: string | null; content: string; createdAt: string }[]> {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Not authenticated')
+
+  const conv = await db.conversation.findUnique({ where: { id: conversationId } })
+  if (!conv || !conv.participantIds.includes(userId)) throw new Error('Unauthorized')
+
+  const messages = await db.message.findMany({
+    where: { conversationId, createdAt: { gt: new Date(since) } },
+    orderBy: { createdAt: 'asc' },
+    include: { sender: { select: { name: true, avatarUrl: true } } },
+  })
+
+  return messages.map(m => ({
+    id: m.id,
+    conversationId: m.conversationId,
+    senderId: m.senderId,
+    senderName: m.sender.name,
+    senderAvatar: m.sender.avatarUrl,
+    content: m.content,
+    createdAt: m.createdAt.toISOString(),
+  }))
+}
+
 export async function sendMessage(conversationId: string, content: string): Promise<void> {
   const senderId = await upsertCurrentUser()
 

@@ -91,7 +91,6 @@ export default function WishlistPage() {
                 <div className="flex items-center gap-2">
                   <Avatar src={requester.avatarUrl} name={requester.name} size="xs"/>
                   <span className="text-xs text-gray-600">{requester.name}</span>
-                  <span className="text-xs text-gray-400">· Trust {requester.trustScore}</span>
                 </div>
                 {!req.fulfilled && req.requesterId !== 'usr_current' && (
                   <Link href="/messages" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold rounded-lg transition-colors">

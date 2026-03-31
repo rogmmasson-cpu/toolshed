@@ -44,6 +44,11 @@ async function upsertCurrentUser() {
 export async function createBooking(input: CreateBookingInput): Promise<string> {
   const renterId = await upsertCurrentUser()
 
+  // Guard: listing must be active
+  const listing = await db.listing.findUnique({ where: { id: input.listingId }, select: { status: true } })
+  if (!listing) throw new Error('Listing not found')
+  if (listing.status !== 'active') throw new Error('This listing is currently paused and not accepting bookings.')
+
   const pricing = calcBookingPricing(
     input.dailyRate,
     input.totalDays,

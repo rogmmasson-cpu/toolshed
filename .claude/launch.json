@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "ToolShed Dev Server",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "name": "toolshed",
+      "runtimeExecutable": "/Users/rogermasson/Claude ToolShed/start-dev.sh",
+      "runtimeArgs": [],
       "port": 3000
     }
   ]

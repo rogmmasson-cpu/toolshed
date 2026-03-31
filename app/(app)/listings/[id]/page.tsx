@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { MapPin, Package, CheckCircle2, ArrowLeft, Users, Clock, Lock } from 'lucide-react'
+import { MapPin, Package, CheckCircle2, ArrowLeft, Users, Clock, Lock, PauseCircle } from 'lucide-react'
 import { auth } from '@clerk/nextjs/server'
 import LocalListingView from '@/components/listings/LocalListingView'
 import { getListingById, getSimilarListings } from '@/lib/mock-db/listings'
@@ -52,6 +52,16 @@ export default async function ListingDetailPage({ params }: Props) {
         <ArrowLeft size={16} /> Back to results
       </Link>
 
+      {/* Paused banner */}
+      {listing.status === 'paused' && (
+        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
+          <PauseCircle size={18} className="text-amber-500 flex-shrink-0" />
+          <p className="text-sm text-amber-800">
+            <span className="font-semibold">This listing is temporarily paused</span> — the owner is not accepting new bookings right now.
+          </p>
+        </div>
+      )}
+
       {/* Photo gallery */}
       <PhotoGallery photos={listing.photos} title={listing.title} />
 
@@ -81,7 +91,6 @@ export default async function ListingDetailPage({ params }: Props) {
               <div>
                 <p className="font-semibold text-gray-900">{listing.owner.name}</p>
                 <p className="text-sm text-gray-500">
-                  Trust score <span className="font-semibold text-brand-500">{listing.owner.trustScore}</span> ·{' '}
                   {Math.round(listing.owner.responseRate * 100)}% response rate
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">

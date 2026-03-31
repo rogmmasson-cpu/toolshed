@@ -428,10 +428,10 @@ export default function NewListingPage() {
                 leftIcon={<DollarSign size={16} />}
                 value={form.depositAmount}
                 onChange={(e) => setForm({ ...form, depositAmount: e.target.value })}
-                hint="Held in escrow, returned after rental"
+                hint="Owner-held, returned after rental"
               />
             </div>
-            <p className="text-xs text-gray-500">ToolShed takes a 10% service fee on each completed rental. You keep 90%.</p>
+            <p className="text-xs text-gray-500">ToolShed does not collect payments. You collect rent and any deposit directly from the renter.</p>
           </div>
         )}
 

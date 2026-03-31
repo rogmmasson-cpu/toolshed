@@ -9,7 +9,7 @@ const RENTER_STEPS = [
 
 const OWNER_STEPS = [
   { icon: '📸', title: 'List Your Tool', desc: 'Upload photos, set a price (our smart suggester helps), and choose your availability.' },
-  { icon: '✅', title: 'Approve Requests', desc: 'Review renter profiles and trust scores before approving. Or turn on Instant Book.' },
+  { icon: '✅', title: 'Approve Requests', desc: 'Review renter profiles and ratings before approving. Or turn on Instant Book.' },
   { icon: '💰', title: 'Get Paid Directly', desc: 'Collect payment and any deposit straight from the renter at pickup — no middleman.' },
 ]
 

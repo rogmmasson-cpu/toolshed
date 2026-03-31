@@ -28,20 +28,26 @@ export default function ListingStatusButton({
     })
   }
 
+  const isPaused = optimisticStatus !== 'active'
+
   return (
     <button
       onClick={toggle}
       disabled={isPending}
-      className="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-200 hover:bg-gray-50 disabled:opacity-50 text-gray-600 text-xs font-semibold rounded-lg transition-colors"
+      className={`inline-flex items-center gap-1 px-3 py-1.5 border disabled:opacity-50 text-xs font-semibold rounded-lg transition-colors ${
+        isPaused
+          ? 'border-forest-200 bg-forest-50 hover:bg-forest-100 text-forest-700'
+          : 'border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700'
+      }`}
     >
       {isPending ? (
         <Loader2 size={11} className="animate-spin" />
-      ) : optimisticStatus === 'active' ? (
-        <Pause size={11} />
-      ) : (
+      ) : isPaused ? (
         <Play size={11} />
+      ) : (
+        <Pause size={11} />
       )}
-      {optimisticStatus === 'active' ? 'Pause' : 'Activate'}
+      {isPaused ? 'Activate' : 'Pause'}
     </button>
   )
 }

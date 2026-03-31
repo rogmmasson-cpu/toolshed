@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Shield, Zap, MessageSquare } from 'lucide-react'
+import { CalendarDays, Shield, Zap, MessageSquare, PauseCircle } from 'lucide-react'
 import { ListingWithOwner } from '@/lib/types'
 import { formatCents, formatDate } from '@/lib/utils/formatting'
 import { calcBookingPricing } from '@/lib/utils/pricing'
@@ -101,22 +101,35 @@ export default function PricingCard({ listing }: { listing: ListingWithOwner }) 
         </div>
       )}
 
-      {/* CTA */}
-      <Button
-        className="w-full mb-3"
-        size="lg"
-        onClick={() => {
-          if (!startDate || !endDate) return
-          router.push(`/book/${listing.id}?start=${startDate}&end=${endDate}`)
-        }}
-        disabled={!startDate || !endDate}
-      >
-        {listing.availability.instantBook ? 'Book Now' : 'Request to Book'}
-      </Button>
+      {/* Paused state */}
+      {listing.status === 'paused' ? (
+        <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+          <PauseCircle size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-900">Listing Paused</p>
+            <p className="text-xs text-amber-700 mt-0.5">The owner has temporarily paused this listing. Check back later or message them for availability.</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* CTA */}
+          <Button
+            className="w-full mb-3"
+            size="lg"
+            onClick={() => {
+              if (!startDate || !endDate) return
+              router.push(`/book/${listing.id}?start=${startDate}&end=${endDate}`)
+            }}
+            disabled={!startDate || !endDate}
+          >
+            {listing.availability.instantBook ? 'Book Now' : 'Request to Book'}
+          </Button>
 
-      <Button variant="secondary" className="w-full mb-4" size="md">
-        <MessageSquare size={16} />Message Owner
-      </Button>
+          <Button variant="secondary" className="w-full mb-4" size="md">
+            <MessageSquare size={16} />Message Owner
+          </Button>
+        </>
+      )}
 
       {/* Deposit info */}
       <div className="flex items-start gap-2 text-xs text-gray-500">
@@ -132,7 +145,7 @@ export default function PricingCard({ listing }: { listing: ListingWithOwner }) 
         <div>
           <p className="text-sm font-semibold text-gray-900">{listing.owner.name}</p>
           <p className="text-xs text-gray-500">
-            Trust score: <span className="font-semibold text-brand-500">{listing.owner.trustScore}</span>
+            {Math.round(listing.owner.responseRate * 100)}% response rate
           </p>
         </div>
       </div>

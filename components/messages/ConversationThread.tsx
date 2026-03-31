@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Send, Package, Lock } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
-import { sendMessage } from '@/lib/actions/messages'
+import { sendMessage, fetchMessages } from '@/lib/actions/messages'
 import type { ConversationWithParticipants, MessageRow } from '@/lib/mock-db/messages'
 import { timeAgo, formatCents } from '@/lib/utils/formatting'
 import { cn } from '@/lib/utils/cn'
@@ -20,7 +20,11 @@ export default function ConversationThread({ conversation, initialMessages, curr
   const [input, setInput] = useState('')
   const [optimisticMessages, setOptimisticMessages] = useState<MessageRow[]>(initialMessages)
   const [isPending, startTransition] = useTransition()
+  const [isLive, setIsLive] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const latestTimestampRef = useRef<string>(
+    initialMessages.at(-1)?.createdAt ?? new Date(0).toISOString()
+  )
 
   const other = conversation.participants.find(p => p.id !== currentUserId)
   const listing = conversation.listing
@@ -28,7 +32,34 @@ export default function ConversationThread({ conversation, initialMessages, curr
   // Sync when server refreshes
   useEffect(() => {
     setOptimisticMessages(initialMessages)
+    if (initialMessages.length > 0) {
+      latestTimestampRef.current = initialMessages.at(-1)!.createdAt
+    }
   }, [initialMessages])
+
+  // Poll for new messages every 3 seconds
+  useEffect(() => {
+    setIsLive(true)
+    const interval = setInterval(async () => {
+      try {
+        const newMsgs = await fetchMessages(conversation.id, latestTimestampRef.current)
+        if (newMsgs.length > 0) {
+          latestTimestampRef.current = newMsgs.at(-1)!.createdAt
+          setOptimisticMessages(prev => {
+            const existingIds = new Set(prev.filter(m => !m.id.startsWith('temp_')).map(m => m.id))
+            const toAdd = newMsgs.filter(m => !existingIds.has(m.id))
+            if (toAdd.length === 0) return prev
+            // Replace matching temp messages and append new ones
+            const withoutTemps = prev.filter(m => !m.id.startsWith('temp_') || !toAdd.some(n => n.senderId === currentUserId && n.content === m.content))
+            return [...withoutTemps, ...toAdd]
+          })
+        }
+      } catch {
+        // silently ignore poll errors
+      }
+    }, 3000)
+    return () => { clearInterval(interval); setIsLive(false) }
+  }, [conversation.id, currentUserId])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -74,7 +105,10 @@ export default function ConversationThread({ conversation, initialMessages, curr
         <Avatar src={other?.avatarUrl ?? null} name={other?.name ?? 'User'} size="sm" />
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-gray-900 leading-tight">{other?.name ?? 'User'}</p>
-          <p className="text-xs text-gray-400">ToolShed member</p>
+          <p className="text-xs text-gray-400 flex items-center gap-1">
+            {isLive && <span className="w-1.5 h-1.5 rounded-full bg-forest-500 animate-pulse inline-block" />}
+            ToolShed member
+          </p>
         </div>
       </div>
 

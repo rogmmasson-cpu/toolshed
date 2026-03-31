@@ -4,7 +4,7 @@ const FEATURES = [
   {
     icon: <UserCheck size={28} className="text-brand-500" />,
     title: 'Verified Profiles',
-    desc: 'Phone and identity verification builds a trust score for every user. Know exactly who you\'re renting to or from before you agree.',
+    desc: 'Phone and identity verification. See verified badges on every profile so you know exactly who you\'re renting to or from before you agree.',
   },
   {
     icon: <Star size={28} className="text-brand-500" />,
