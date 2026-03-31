@@ -26,6 +26,9 @@ model User {
   totalRentals         Int      @default(0)
   totalLends           Int      @default(0)
 
+  bannedAt     DateTime?
+  bannedReason String?
+
   listings       Listing[]
   rentals        Booking[]  @relation("RenterBookings")
   lends          Booking[]  @relation("OwnerBookings")
@@ -80,6 +83,8 @@ model Listing {
   reviewCount   Int   @default(0)
   totalRentals  Int   @default(0)
   viewCount     Int   @default(0)
+
+  takenDownReason String?
 
   status      String    @default("active")
   publishedAt DateTime?
