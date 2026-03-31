@@ -6,7 +6,6 @@ import { getListingsByOwner } from '@/lib/mock-db/listings'
 import { getBookingsByOwner, getBookingsByRenter } from '@/lib/mock-db/bookings'
 import { formatCents } from '@/lib/utils/formatting'
 import Avatar from '@/components/ui/Avatar'
-import TrustScoreCard from '@/components/profile/TrustScoreCard'
 import DashboardPendingRow from '@/components/dashboard/DashboardPendingRow'
 
 export default async function DashboardPage() {
@@ -148,11 +147,8 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Verified Profile */}
         <div>
-          {user && <TrustScoreCard user={user} />}
-
-          <div className="card p-5 mt-4">
+          <div className="card p-5">
             <h3 className="font-semibold text-gray-900 mb-3">Quick Actions</h3>
             <div className="space-y-2">
               {[

@@ -14,7 +14,6 @@ import ListingCard from '@/components/listings/ListingCard'
 import Avatar from '@/components/ui/Avatar'
 import StarRating from '@/components/ui/StarRating'
 import Badge from '@/components/ui/Badge'
-import TrustScoreCard from '@/components/profile/TrustScoreCard'
 import { getUserById } from '@/lib/mock-db/users'
 import MessageOwnerButton from '@/components/messages/MessageOwnerButton'
 import AffiliateRecommendations from '@/components/listings/AffiliateRecommendations'
@@ -225,11 +224,6 @@ export default async function ListingDetailPage({ params }: Props) {
         {/* Right: pricing card */}
         <div>
           <PricingCard listing={listing} />
-          {owner && (
-            <div className="mt-4">
-              <TrustScoreCard user={owner} />
-            </div>
-          )}
         </div>
       </div>
     </div>

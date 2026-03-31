@@ -5,7 +5,6 @@ import { getUserById } from '@/lib/mock-db/users'
 import { getListingsByOwner } from '@/lib/mock-db/listings'
 import { getReviewsForUser } from '@/lib/mock-db/reviews'
 import Avatar from '@/components/ui/Avatar'
-import TrustScoreCard from '@/components/profile/TrustScoreCard'
 import ReviewCard from '@/components/reviews/ReviewCard'
 import ListingCard from '@/components/listings/ListingCard'
 import { formatDate } from '@/lib/utils/formatting'
@@ -74,7 +73,6 @@ export default async function UserProfilePage({ params }: Props) {
             )}
           </div>
 
-          <TrustScoreCard user={user} />
         </div>
 
         {/* Right: listings + reviews */}
