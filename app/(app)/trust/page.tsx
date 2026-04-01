@@ -121,29 +121,6 @@ export default function TrustPage() {
         </div>
       </section>
 
-      {/* Report */}
-      <section className="py-20 px-4">
-        <div className="container-app max-w-3xl mx-auto">
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 flex flex-col sm:flex-row gap-6 items-start">
-            <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center shrink-0">
-              <AlertTriangle size={22} className="text-amber-600" />
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 mb-2">Report a Safety Concern</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                If you experience harassment, fraud, a dangerous tool, or any other safety issue — please report it immediately. We review every report within 24 hours and take swift action.
-              </p>
-              <a
-                href="mailto:safety@toolshed.com"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-xl transition-colors"
-              >
-                <Phone size={14} />
-                Contact Safety Team
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Links */}
       <section className="py-10 px-4 border-t border-gray-100">
