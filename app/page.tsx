@@ -1,27 +1,32 @@
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import Hero from '@/components/landing/Hero'
-import CategoryGrid from '@/components/landing/CategoryGrid'
+import WhatIsToolShed from '@/components/landing/WhatIsToolShed'
 import HowItWorks from '@/components/landing/HowItWorks'
-import FeaturedListings from '@/components/landing/FeaturedListings'
 import TrustSignals from '@/components/landing/TrustSignals'
-import CommunityStats from '@/components/landing/CommunityStats'
-import Testimonials from '@/components/landing/Testimonials'
-import AppDownloadCTA from '@/components/landing/AppDownloadCTA'
+import CategoryGrid from '@/components/landing/CategoryGrid'
+import FeaturedListings from '@/components/landing/FeaturedListings'
+import LandingCTA from '@/components/landing/LandingCTA'
 
 export default function LandingPage() {
   return (
     <>
       <Navbar />
       <main>
+        {/* 1. What it is + search */}
         <Hero />
-        <CategoryGrid />
-        <FeaturedListings />
+        {/* 2. Quick value prop */}
+        <WhatIsToolShed />
+        {/* 3. How it works — renter & owner */}
         <HowItWorks />
-        <Testimonials />
+        {/* 4. Safety & trust */}
         <TrustSignals />
-        <CommunityStats />
-        <AppDownloadCTA />
+        {/* 5. Real listings near you */}
+        <FeaturedListings />
+        {/* 6. Browse by category */}
+        <CategoryGrid />
+        {/* 7. Final CTA */}
+        <LandingCTA />
       </main>
       <Footer />
     </>

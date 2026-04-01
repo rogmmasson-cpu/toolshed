@@ -3,8 +3,8 @@ import { Shield, MessageSquare, UserCheck, Star } from 'lucide-react'
 const FEATURES = [
   {
     icon: <UserCheck size={28} className="text-brand-500" />,
-    title: 'Verified Profiles',
-    desc: 'Phone and identity verification. See verified badges on every profile so you know exactly who you\'re renting to or from before you agree.',
+    title: 'Neighbor Reviews',
+    desc: 'Every owner and renter has a public rating built from real completed rentals. Read reviews and see response rates before you book.',
   },
   {
     icon: <Star size={28} className="text-brand-500" />,
@@ -23,12 +23,6 @@ const FEATURES = [
   },
 ]
 
-const STATS = [
-  { value: '12,000+', label: 'Items Listed' },
-  { value: '4.8★', label: 'Average Rating' },
-  { value: '98%', label: 'On-Time Returns' },
-  { value: '$0', label: 'Unresolved Claims' },
-]
 
 export default function TrustSignals() {
   return (
@@ -60,15 +54,6 @@ export default function TrustSignals() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {STATS.map((s, i) => (
-            <div key={i} className="text-center p-6 bg-gray-50 rounded-2xl">
-              <p className="text-3xl font-extrabold text-brand-500">{s.value}</p>
-              <p className="text-sm text-gray-500 mt-1">{s.label}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   )

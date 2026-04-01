@@ -69,13 +69,9 @@ export default function Hero() {
             </button>
           </form>
 
-          {/* Sign up nudge */}
-          <p className="mt-5 text-white/70 text-sm">
-            New here?{' '}
-            <a href="/signup" className="text-white font-semibold underline underline-offset-2 hover:text-white/90 transition-colors">
-              Create a free account
-            </a>
-            {' '}to book and save tools.
+          {/* No-auth nudge */}
+          <p className="mt-5 text-white/75 text-sm font-medium">
+            🔓 Browse for free — no account needed. Sign up only when you&apos;re ready to book or list.
           </p>
 
           {/* Popular searches */}
@@ -90,6 +86,22 @@ export default function Hero() {
                 {term}
               </button>
             ))}
+          </div>
+
+          {/* Dual CTA */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-7">
+            <a
+              href="/browse"
+              className="flex items-center gap-2 px-7 py-3 bg-white text-brand-600 font-semibold rounded-2xl hover:bg-white/90 transition-colors shadow-md text-sm"
+            >
+              Browse All Tools
+            </a>
+            <a
+              href="/listings/new"
+              className="flex items-center gap-2 px-7 py-3 bg-white/15 hover:bg-white/25 text-white font-semibold rounded-2xl transition-colors text-sm border border-white/30"
+            >
+              List Your Tools
+            </a>
           </div>
         </div>
       </div>
