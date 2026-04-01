@@ -18,8 +18,9 @@ const isPublicRoute = createRouteMatcher([
   '/liability(.*)',
   '/cookies(.*)',
   '/groups(.*)',
-  '/profile/(.*)',
+  '/profile(.*)',
   '/api/upload',
+  '/api/upc-lookup',
 ])
 
 export const proxy = clerkMiddleware(async (auth, req) => {
